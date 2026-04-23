@@ -25,14 +25,15 @@ CREATE TABLE IF NOT EXISTS mshop_item_packs
 -- for site
 CREATE TABLE IF NOT EXISTS mshop_goods
 (
-    id             BIGINT               NOT NULL AUTO_INCREMENT,
-    name           VARCHAR(25)          NOT NULL UNIQUE,
-    description    VARCHAR(500)         NOT NULL,
-    item_id        BIGINT               NOT NULL,
-    favorite       TINYINT(1) DEFAULT 0 NOT NULL,
-    prioritization INT                  NOT NULL,
-    price          DECIMAL(10, 2)       NOT NULL,
+    id             BIGINT                   NOT NULL AUTO_INCREMENT,
+    name           VARCHAR(25)              NOT NULL UNIQUE,
+    description    VARCHAR(500)             NOT NULL,
+    item_id        BIGINT                   NOT NULL,
+    favorite       TINYINT(1) DEFAULT 0     NOT NULL,
+    prioritization INT                      NOT NULL,
+    price          DECIMAL(10, 2)           NOT NULL,
     image_link     VARCHAR(512),
+    active         BOOLEAN    DEFAULT FALSE NOT NULL, -- hide test item from users
 
     PRIMARY KEY (id),
     CONSTRAINT fk__goods__item_id__item__id FOREIGN KEY (item_id) REFERENCES mshop_items (id)
@@ -86,3 +87,5 @@ CREATE TABLE IF NOT EXISTS mshop_crypto_payments
     updated   TIMESTAMP    NOT NULL,
     PRIMARY KEY (id)
 );
+
+CREATE INDEX IF NOT EXISTS idx__player_order__username ON mshop_player_orders (user_name);
