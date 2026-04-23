@@ -1,0 +1,16 @@
+services:
+  market_sync_db:
+    image: mariadb:10.3.18-bionic
+    ports:
+      - "3306:3306"
+    networks:
+      - mc_shop_backend
+    environment:
+      MYSQL_USER: market_sync_db
+      MYSQL_PASSWORD: market_sync_db
+      MYSQL_DATABASE: market_sync_db
+      MYSQL_ROOT_PASSWORD: market_sync_db_root
+    restart: unless-stopped
+
+networks:
+  markey_sync_backend:
