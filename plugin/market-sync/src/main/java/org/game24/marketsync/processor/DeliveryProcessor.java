@@ -75,7 +75,7 @@ public class DeliveryProcessor {
         ItemType type = item.getType();
         CompletableFuture<DeliveryResult> resultFuture = switch (type) {
             case ITEM -> itemDeliveryService.completeItemDelivery(delivery, item);
-            case COMMAND -> commandDeliveryService.completeItemDelivery(delivery, item);
+            case COMMAND -> commandDeliveryService.completeCommandDelivery(delivery, item);
             case PACK -> processPack(delivery, item);
         };
 
