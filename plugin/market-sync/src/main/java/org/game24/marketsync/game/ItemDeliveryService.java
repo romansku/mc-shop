@@ -16,6 +16,7 @@ import org.game24.marketsync.model.Item;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class ItemDeliveryService {
 
@@ -71,7 +72,13 @@ public class ItemDeliveryService {
 
         }, () -> logOffline(username, orderId, itemId, resultFuture));
 
-        return resultFuture;
+        return resultFuture
+                .orTimeout(10, TimeUnit.SECONDS)
+                .exceptionally(e -> {
+                    plugin.getSLF4JLogger().error(
+                            "ItemDelivery error; order: {}, item: {}, user: {}", orderId, itemId, username, e);
+                    return DeliveryResult.FAILED;
+                });
     }
 
     private void logOffline(String username, long orderId, long itemId, CompletableFuture<DeliveryResult> resultFuture) {
