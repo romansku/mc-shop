@@ -2,6 +2,7 @@ package org.game24.marketsync.game;
 
 import lombok.NonNull;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.game24.marketsync.model.Delivery;
 import org.game24.marketsync.model.DeliveryResult;
@@ -15,10 +16,7 @@ public class CommandDeliveryService {
 
     private static final Map<String, CmdType> CMD_PREFIX_TO_TYPE = Map.of(
             "lp ", CmdType.BUKKIT,
-            "points ", CmdType.BUKKIT,
-            "PREFIX ", CmdType.LUCK_PERMS,
-            "SUFFIX ", CmdType.LUCK_PERMS,
-            "COLOR ", CmdType.LUCK_PERMS
+            "points ", CmdType.BUKKIT
     );
 
     private final JavaPlugin plugin;
@@ -32,20 +30,24 @@ public class CommandDeliveryService {
             return CompletableFuture.completedFuture(DeliveryResult.FAILED);
         }
 
+        String username = delivery.getUsername();
+        OfflinePlayer player = Bukkit.getOfflinePlayer(username);
+        if (!player.hasPlayedBefore()) {
+            return CompletableFuture.completedFuture(DeliveryResult.INCOMPLETED);
+        }
+
         String rawCMD = item.getData();
         String[] cmdArray = rawCMD.split(" ");
         String start = cmdArray[0];
         CmdType cmdType = CMD_PREFIX_TO_TYPE.get(start);
         DeliveryResult result = switch (cmdType) {
             case BUKKIT -> bukkitCommand(rawCMD, delivery);
-            case LUCK_PERMS -> lpCommand(rawCMD, delivery);
         };
 
         return CompletableFuture.completedFuture(result)
                 .exceptionally(e -> {
                     long orderId = delivery.getOrderId();
                     Long itemId = delivery.getId();
-                    String username = delivery.getUsername();
                     plugin.getSLF4JLogger().error(
                             "ItemDelivery error; order: {}, item: {}, user: {}", orderId, itemId, username, e);
                     return DeliveryResult.FAILED;
@@ -68,14 +70,8 @@ public class CommandDeliveryService {
         }
     }
 
-    private DeliveryResult lpCommand(String command, @NonNull Delivery delivery) {
-        //todo
-        plugin.getSLF4JLogger().error("LP commands is not implemented yet: {}", command);
-        return DeliveryResult.FAILED;
-    }
-
     private enum CmdType {
-        BUKKIT, LUCK_PERMS
+        BUKKIT
     }
 
 }
