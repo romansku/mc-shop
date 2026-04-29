@@ -17,7 +17,11 @@ public class DeliveryService {
 
     public Delivery prepareAttempt(Delivery delivery) {
 
-        Delivery processable = deliveryDAO.getByOrderAndItem(delivery.getOrderId(), delivery.getItemId());
+        Delivery processable = deliveryDAO.getByOrderAndItem(
+                delivery.getOrderId(),
+                delivery.getItemId(),
+                delivery.getPackId());
+
         if (processable != null) {
             DeliveryResult status = processable.getStatus();
             if (status == DeliveryResult.COMPLETED) {
@@ -32,5 +36,11 @@ public class DeliveryService {
         long id = deliveryDAO.save(processable);
         processable.setId(id);
         return processable;
+    }
+
+    public Delivery save(Delivery delivery) {
+        long id = deliveryDAO.save(delivery);
+        delivery.setId(id);
+        return delivery;
     }
 }

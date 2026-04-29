@@ -5,9 +5,7 @@ import org.game24.marketsync.model.Delivery;
 
 public interface DeliveryDAO {
 
-    long get(@NonNull Delivery delivery);
-
-    Delivery getByOrderAndItem(long orderId, long itemId);
+    Delivery getByOrderAndItem(long orderId, long itemId, Long packId);
 
     long save(@NonNull Delivery delivery);
 }

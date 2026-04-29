@@ -50,8 +50,8 @@ public class DeliveryProcessor {
     public @NonNull DeliveryResult process(@NonNull Delivery delivery) {
         delivery = deliveryService.prepareAttempt(delivery);
         DeliveryResult status = delivery.getStatus();
-        if (status == DeliveryResult.COMPLETED) {
-            return DeliveryResult.COMPLETED;
+        if (status != DeliveryResult.INCOMPLETED) {
+            return status;
         }
 
         long itemId = delivery.getItemId();
@@ -79,7 +79,18 @@ public class DeliveryProcessor {
             case PACK -> processPack(delivery, item);
         };
 
-        return resultFuture.join();
+        DeliveryResult postStatus = resultFuture.join();
+        Delivery saved = deliveryService.save(Delivery.builder()
+                .id(delivery.getId())
+                .orderId(orderId)
+                .itemId(itemId)
+                .packId(delivery.getPackId())
+                .username(username)
+                .status(postStatus)
+                .attempts(delivery.getAttempts())
+                .attemptTime(delivery.getAttemptTime())
+                .build());
+        return saved.getStatus();
     }
 
     private @NonNull CompletableFuture<DeliveryResult> processPack(@NonNull Delivery delivery,
@@ -101,6 +112,7 @@ public class DeliveryProcessor {
                         .orderId(orderId)
                         .itemId(i.getId())
                         .packId(packId)
+                        .status(DeliveryResult.INCOMPLETED)
                         .build())
                 .<Supplier<DeliveryResult>>map(d -> () -> this.process(d))
                 .map(sup -> CompletableFuture.supplyAsync(sup, internalWorker)
