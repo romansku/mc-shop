@@ -5,7 +5,6 @@ import org.game24.marketsync.dao.OrderDAO;
 import org.game24.marketsync.model.Order;
 
 import java.util.List;
-import java.util.Locale;
 
 public class OrderService {
 
@@ -16,8 +15,8 @@ public class OrderService {
     }
 
     @NonNull
-    public List<@NonNull Order> findReadyOrdersForUser(@NonNull String user) {
-        return orderDAO.findReadyOrdersForUser(user.toLowerCase(Locale.ROOT));
+    public List<@NonNull Order> findPaidOrders() {
+        return orderDAO.findPaidOrders();
     }
 
 

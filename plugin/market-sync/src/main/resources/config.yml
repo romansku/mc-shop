@@ -8,3 +8,6 @@ database:
   pool:
     max: 4
     min: 1
+
+job:
+  delay-minutes: 2
