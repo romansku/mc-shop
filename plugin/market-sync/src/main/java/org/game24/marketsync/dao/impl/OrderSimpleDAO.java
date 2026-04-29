@@ -30,28 +30,11 @@ public class OrderSimpleDAO implements OrderDAO {
         this.logger = logger;
     }
 
-    @Override
-    public @NonNull List<Order> findReadyOrdersForUser(@NonNull String username) {
-        String sql = """
-                SELECT po.id as order_id,
-                       i.id as item_id,
-                       i.item_type,
-                       i.data,
-                       i.amount
-                    FROM mshop_player_orders po
-                JOIN mshop_order_items oi on po.id = oi.order_id
-                JOIN mshop_items i on oi.item_id = i.id
-                WHERE user_name = ?
-                AND status = 'PAID'
-                """;
-
-
+    private @NonNull List<@NonNull Order> findOrdersByQuery(String sql) {
         Map<Long, List<Item>> orderToItems = new HashMap<>();
         Map<Long, Order.OrderBuilder> orderBuilders = new HashMap<>();
         try (Connection conn = database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, username);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -61,7 +44,7 @@ public class OrderSimpleDAO implements OrderDAO {
                             Order.builder()
                                     .id(id)
                                     .status(OrderStatus.PAID)
-                                    .username(username)
+                                    .username(null)
                     );
 
                     // Собираем список предметов
@@ -91,10 +74,29 @@ public class OrderSimpleDAO implements OrderDAO {
                     .toList();
 
         } catch (SQLException e) {
-            logger.error("Error on search for orders for user {}", username, e);
+            logger.error("Error on search for orders for user {}", null, e);
         }
 
-        return Collections.emptyList();
+        return List.of();
+    }
+
+
+    @Override
+    public @NonNull List<@NonNull Order> findPaidOrders() {
+        String sql = """
+                SELECT po.id as order_id,
+                       i.id as item_id,
+                       i.item_type,
+                       i.data,
+                       i.amount
+                    FROM mshop_player_orders po
+                JOIN mshop_order_items oi on po.id = oi.order_id
+                JOIN mshop_items i on oi.item_id = i.id
+                AND status = 'PAID'
+                """;
+
+        return findOrdersByQuery(sql);
+
     }
 
     @Override

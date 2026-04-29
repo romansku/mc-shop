@@ -40,4 +40,7 @@ public class MarketSyncConfig {
         return this.config.getInt("database.pool.min");
     }
 
+    public int getJobDelay() {
+        return this.config.getInt("job.delay-minutes");
+    }
 }

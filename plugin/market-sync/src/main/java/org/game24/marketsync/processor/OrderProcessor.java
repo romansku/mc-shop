@@ -28,7 +28,7 @@ public class OrderProcessor {
 
     private final LoadingCache<Long, Lock> orderLocks = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.HOURS)
-            .build(CacheLoader.from(k -> new ReentrantLock(true)));
+            .build(CacheLoader.from(_ -> new ReentrantLock(true)));
 
     private final DeliveryProcessor deliveryProcessor;
 
@@ -50,6 +50,7 @@ public class OrderProcessor {
             try {
                 CompletableFuture<DeliveryResult>[] deliveryFutures = runDeliveries(order);
                 CompletableFuture.allOf(deliveryFutures)
+                        .orTimeout(2, TimeUnit.MINUTES)
                         .whenComplete((ignored, ex) -> {
                             if (ex != null) {
                                 logger.error("Error processing order {}", order.getId(), ex);
@@ -65,15 +66,14 @@ public class OrderProcessor {
                             if (countCompleted == countItems) {
                                 orderService.complete(order.getId());
                             }
-                        });
+                        })
+                        .join();
             } finally {
                 lock.unlock();
             }
         } else {
             logger.info("Order {} has been locked", order.getId());
         }
-
-
     }
 
     private CompletableFuture<DeliveryResult> @NonNull [] runDeliveries(@NonNull Order order) {
@@ -85,7 +85,7 @@ public class OrderProcessor {
                         .build())
                 .<Supplier<DeliveryResult>>map(d -> () -> deliveryProcessor.process(d))
                 .map(c -> CompletableFuture.supplyAsync(c, worker)
-                        .orTimeout(2, TimeUnit.MINUTES)
+                        .orTimeout(1, TimeUnit.MINUTES)
                         .exceptionally(ex -> {
                             logger.error("Cannot on delivery item", ex);
                             return DeliveryResult.FAILED;

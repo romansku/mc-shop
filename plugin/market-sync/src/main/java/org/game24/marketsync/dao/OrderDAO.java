@@ -8,7 +8,7 @@ import java.util.List;
 public interface OrderDAO {
 
     @NonNull
-    List<Order> findReadyOrdersForUser(@NonNull String username);
+    List<@NonNull Order> findPaidOrders();
 
     void complete(long orderId);
 }
