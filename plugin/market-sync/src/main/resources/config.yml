@@ -1,0 +1,10 @@
+# mariadb only
+database:
+  host: localhost
+  port: 3306
+  db: 'db'
+  username: 'user'
+  password: 'pass'
+  pool:
+    max: 4
+    min: 1
