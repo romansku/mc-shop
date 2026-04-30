@@ -5,12 +5,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.game24.marketsync.game.hook.LuckPermsHook;
+import org.game24.marketsync.game.hook.PlayerPointsHook;
 import org.game24.marketsync.model.Delivery;
 import org.game24.marketsync.model.DeliveryResult;
 import org.game24.marketsync.model.Item;
 import org.game24.marketsync.model.ItemType;
 import org.slf4j.Logger;
 
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -20,9 +22,12 @@ public class CommandDeliveryService {
 
     private final LuckPermsHook luckPermsHook;
 
+    private final PlayerPointsHook playerPointsHook;
+
     public CommandDeliveryService(JavaPlugin plugin) {
         this.logger = plugin.getSLF4JLogger();
         this.luckPermsHook = new LuckPermsHook(plugin);
+        this.playerPointsHook = new PlayerPointsHook(plugin);
     }
 
     public CompletableFuture<DeliveryResult> completeCommandDelivery(@NonNull Delivery delivery, @NonNull Item item) {
@@ -40,37 +45,47 @@ public class CommandDeliveryService {
             return CompletableFuture.completedFuture(DeliveryResult.INCOMPLETED);
         }
 
-        // lp user {player} permission settemp mshop.nickname.prefix.text true 365d
-        // LP;;perm;;prefix;;365;;DAYS
+        // LP;;perm;;mshop.nickname.prefix.color;;6;;MONTHS
+        // LP;;group;;vip;;7;;DAYS
+        // PP;;give;;500
         String rawCMD = item.getData();
 
 
         String[] cmdArray = rawCMD.split(";;");
         String apiType = cmdArray[0];
+        final String cmdType = cmdArray[1];
         CompletableFuture<DeliveryResult> future = switch (apiType) {
-            case "LP" -> switch (cmdArray[1]) {
+            case "LP" -> switch (cmdType) {
                 case "perm" -> {
                     String permission = cmdArray[2];
-                    //todo: parse expiration
-                    yield luckPermsHook.addPermission(username, permission, 180);
+                    long duration = Long.parseLong(cmdArray[3]);
+                    ChronoUnit unit = ChronoUnit.valueOf(cmdArray[4]);
+                    yield luckPermsHook.addPermission(username, permission, duration, unit);
                 }
                 case "group" -> {
                     String group = cmdArray[2];
-                    String daysStr = cmdArray[3];
-                    long days = Long.parseLong(daysStr);
-                    yield luckPermsHook.addGroup(username, group, days);
+                    long duration = Long.parseLong(cmdArray[3]);
+                    ChronoUnit unit = ChronoUnit.valueOf(cmdArray[4]);
+                    yield luckPermsHook.addGroup(username, group, duration, unit);
                 }
                 default -> {
                     logger.error(
-                            "ItemDelivery LP command; cmd: {}; order: {}, item: {}, user: {}, delivery: {}",
+                            "ItemDelivery LP command unsupported; cmd: {}; order: {}, item: {}, user: {}, delivery: {}",
                             rawCMD, orderId, itemId, username, deliveryId);
                     yield CompletableFuture.completedFuture(DeliveryResult.FAILED);
                 }
             };
             case "PP" -> {
+                    if (cmdType.equals("give")) {
+                        String amountStr = cmdArray[2];
+                        int amount = Integer.parseInt(amountStr);
+                        yield playerPointsHook.givePoints(username, amount);
+                    }
 
-                //todo: not implemented
-                yield CompletableFuture.completedFuture(DeliveryResult.FAILED);
+                    logger.error(
+                            "ItemDelivery PP command unsupported; cmd: {}; order: {}, item: {}, user: {}, delivery: {}",
+                            rawCMD, orderId, itemId, username, deliveryId);
+                    yield CompletableFuture.completedFuture(DeliveryResult.FAILED);
             }
             default -> {
                 logger.error(

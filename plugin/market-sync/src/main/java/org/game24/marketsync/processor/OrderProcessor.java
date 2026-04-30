@@ -57,13 +57,13 @@ public class OrderProcessor {
                                 return;
                             }
 
-                            long countCompleted = Arrays.stream(deliveryFutures)
+                            long finishedCount = Arrays.stream(deliveryFutures)
                                     .map(CompletableFuture::join)
-                                    .filter(dr -> Objects.equals(dr, DeliveryResult.COMPLETED))
+                                    .filter(dr -> !Objects.equals(dr, DeliveryResult.INCOMPLETED))
                                     .count();
 
                             int countItems = order.getItems().size();
-                            if (countCompleted == countItems) {
+                            if (finishedCount == countItems) {
                                 orderService.complete(order.getId());
                             }
                         })
