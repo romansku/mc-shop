@@ -3,17 +3,17 @@ VALUES ('COMMAND', 'PP;;give;;100', 1),                                    -- 1$
        ('COMMAND', 'PP;;give;;220', 1),                                    -- 2$
        ('COMMAND', 'PP;;give;;580', 1),                                    -- 5$
        ('COMMAND', 'PP;;give;;1250', 1),                                   -- 10$
-       ('COMMAND', 'LP;;perm;;mshop.nickname.prefix.text;;6;;MONTHS', 1),  -- 1$
-       ('COMMAND', 'LP;;perm;;mshop.nickname.prefix.color;;6;;MONTHS', 1), -- 1$
-       ('COMMAND', 'LP;;perm;;mshop.nickname.suffix.text;;6;;MONTHS', 1),  -- 1$
-       ('COMMAND', 'LP;;perm;;mshop.nickname.suffix.color;;6;;MONTHS', 1), -- 1$
-       ('COMMAND', 'LP;;perm;;mshop.nickname.chat.color;;6;;MONTHS', 1),   -- 1$
-       ('COMMAND', 'LP;;perm;;mshop.nickname.name.color;;6;;MONTHS', 1),   -- 1$
+       ('COMMAND', 'LP;;perm;;mshop.nickname.prefix.text;;183;;DAYS', 1),  -- 1$
+       ('COMMAND', 'LP;;perm;;mshop.nickname.prefix.color;;183;;DAYS', 1), -- 1$
+       ('COMMAND', 'LP;;perm;;mshop.nickname.suffix.text;;183;;DAYS', 1),  -- 1$
+       ('COMMAND', 'LP;;perm;;mshop.nickname.suffix.color;;183;;DAYS', 1), -- 1$
+       ('COMMAND', 'LP;;perm;;mshop.nickname.chat.color;;183;;DAYS', 1),   -- 1$
+       ('COMMAND', 'LP;;perm;;mshop.nickname.name.color;;183;;DAYS', 1),   -- 1$
        ('COMMAND', 'LP;;group;;vip;;7;;DAYS', 1),                          -- 1$
-       ('COMMAND', 'LP;;group;;vip;;1;;MONTHS', 1),                        -- 3$
-       ('COMMAND', 'LP;;group;;vip;;3;;MONTHS', 1),                        -- 8$
-       ('COMMAND', 'LP;;group;;vip;;6;;MONTHS', 1),                        -- 15$
-       ('COMMAND', 'LP;;group;;vip;;12;;MONTHS', 1),                       -- 25$
+       ('COMMAND', 'LP;;group;;vip;;31;;DAYS', 1),                         -- 3$
+       ('COMMAND', 'LP;;group;;vip;;92;;DAYS', 1),                         -- 8$
+       ('COMMAND', 'LP;;group;;vip;;183;;DAYS', 1),                        -- 15$
+       ('COMMAND', 'LP;;group;;vip;;365;;DAYS', 1),                        -- 25$
        ('PACK', 'no data', 1) -- 40$
 ;
 
