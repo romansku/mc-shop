@@ -58,6 +58,13 @@ public class MarketSync extends JavaPlugin {
 
     private void initServices() {
         database = new Database(this.config);
+        try {
+            database.init(this);
+        } catch (Exception e) {
+            logger.error("Error on migration database; disable plugin", e);
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
         DeliveryDAO deliveryDAO = new DeliverySimpleDAO(database, logger);
         deliveryService = new DeliveryService(deliveryDAO);
@@ -83,7 +90,7 @@ public class MarketSync extends JavaPlugin {
         int jobDelay = config.getJobDelay();
         scheduledTask = orderProcessingExecutor.scheduleWithFixedDelay(
                 job,
-                jobDelay,
+                0,
                 jobDelay,
                 TimeUnit.MINUTES);
     }
@@ -92,7 +99,9 @@ public class MarketSync extends JavaPlugin {
     public void onDisable() {
         shutdownOrderProcessingJob();
 
-        database.close();
+        if (database != null) {
+            database.close();
+        }
     }
 
     private void shutdownOrderProcessingJob() {

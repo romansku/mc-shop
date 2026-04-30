@@ -1,8 +1,6 @@
 package org.game24.marketsync.processor;
 
 import lombok.NonNull;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.game24.marketsync.game.CommandDeliveryService;
 import org.game24.marketsync.game.ItemDeliveryService;
@@ -64,13 +62,6 @@ public class DeliveryProcessor {
             return DeliveryResult.FAILED;
         }
 
-        String username = delivery.getUsername();
-        Player onlinePlayer = Bukkit.getPlayerExact(username);
-        if (onlinePlayer == null) {
-            logger.debug("Player {} for order {} is offline", username, orderId);
-            return DeliveryResult.INCOMPLETED;
-        }
-
         Item item = itemOpt.get();
         ItemType type = item.getType();
         CompletableFuture<DeliveryResult> resultFuture = switch (type) {
@@ -85,7 +76,7 @@ public class DeliveryProcessor {
                 .orderId(orderId)
                 .itemId(itemId)
                 .packId(delivery.getPackId())
-                .username(username)
+                .username(delivery.getUsername())
                 .status(postStatus)
                 .attempts(delivery.getAttempts())
                 .attemptTime(delivery.getAttemptTime())

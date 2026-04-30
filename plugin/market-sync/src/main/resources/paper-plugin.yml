@@ -1,4 +1,4 @@
-name: ExamplePlugin
+name: MarketSync
 version: 1.0.0
 main: org.game24.marketsync.MarketSync
 description: Sync with site through DB
@@ -7,6 +7,9 @@ website: https://todo.org
 api-version: '1.21.11'
 bootstrapper: org.game24.marketsync.init.MarketSyncBootstrap
 
-depend:
-  - LuckPerms
-  - PlayerPoints
+dependencies:
+  server:
+    LuckPerms:
+      load: BEFORE
+    PlayerPoints:
+      load: BEFORE

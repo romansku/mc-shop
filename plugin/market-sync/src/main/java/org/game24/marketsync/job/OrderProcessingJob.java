@@ -25,8 +25,13 @@ public class OrderProcessingJob implements Runnable {
 
     @Override
     public void run() {
-        logger.info("Staring order processing");
+        logger.debug("Staring order processing");
         List<@NonNull Order> orders = orderService.findPaidOrders();
+        if (orders.isEmpty()) {
+            logger.debug("No orders to process. Finish");
+            return;
+        }
+
         logger.info("Found {} orders to process", orders.size());
         for (Order order : orders) {
             if (Thread.currentThread().isInterrupted()) {
@@ -36,6 +41,7 @@ public class OrderProcessingJob implements Runnable {
 
             orderProcessor.processOrder(order);
         }
+
         logger.info("Finish processing orders");
     }
 }
