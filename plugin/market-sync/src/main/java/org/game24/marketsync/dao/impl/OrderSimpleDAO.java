@@ -39,23 +39,16 @@ public class OrderSimpleDAO implements OrderDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     long orderId = rs.getLong("order_id");
+                    String username = rs.getString("username");
 
                     orderBuilders.computeIfAbsent(orderId, id ->
                             Order.builder()
                                     .id(id)
+                                    .username(username)
                                     .status(OrderStatus.PAID)
-                                    .username(null)
                     );
 
                     // Собираем список предметов
-                    orderToItems.computeIfAbsent(orderId, ignore -> new ArrayList<>())
-                            .add(Item.builder()
-                                    .id(rs.getLong("item_id"))
-                                    .type(ItemType.valueOf(rs.getString("item_type"))) // enum безопаснее через valueOf
-                                    .data(rs.getString("data"))
-                                    .count(rs.getInt("amount"))
-                                    .build());
-
                     orderToItems.computeIfAbsent(orderId, ignore -> new ArrayList<>())
                             .add(Item.builder()
                                     .id(rs.getLong("item_id"))
@@ -85,6 +78,7 @@ public class OrderSimpleDAO implements OrderDAO {
     public @NonNull List<@NonNull Order> findPaidOrders() {
         String sql = """
                 SELECT po.id as order_id,
+                       po.user_name as username,
                        i.id as item_id,
                        i.item_type,
                        i.data,
@@ -104,8 +98,8 @@ public class OrderSimpleDAO implements OrderDAO {
 
         String sql = """
                 UPDATE mshop_player_orders
-                SET status = 'COMPLETED'
-                where id = ?
+                SET status = 'COMPLETED', delivered_date = NOW()
+                WHERE id = ?
                 """;
 
         try (Connection conn = database.getConnection();

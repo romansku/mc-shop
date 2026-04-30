@@ -5,7 +5,6 @@ import org.game24.marketsync.dao.Database;
 import org.game24.marketsync.dao.DeliveryDAO;
 import org.game24.marketsync.model.Delivery;
 import org.game24.marketsync.model.DeliveryResult;
-import org.jspecify.annotations.Nullable;
 import org.mariadb.jdbc.Statement;
 import org.slf4j.Logger;
 
@@ -54,7 +53,7 @@ public class DeliverySimpleDAO implements DeliveryDAO {
                     long item_id = rs.getLong("item_id");
                     long pack_id = rs.getLong("pack_id");
                     String username = rs.getString("username");
-                    DeliveryResult status = rs.getObject("status", DeliveryResult.class);
+                    DeliveryResult status = DeliveryResult.valueOf(rs.getString("status"));
                     Instant attemptTime = rs.getTimestamp("attempt_time").toInstant();
                     int attempts = rs.getInt("attempts");
                     return Delivery.builder()
@@ -83,7 +82,7 @@ public class DeliverySimpleDAO implements DeliveryDAO {
         String sql = """
                 INSERT INTO mshop_deliveries
                 (id, order_id, item_id, pack_id, username, status, attempt_time, attempts)
-                VALUES (2, 1, 1, null, '111', 'FAILED', now(), 1)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE id           = LAST_INSERT_ID(id),
                                         status       = VALUES(status),
                                         attempt_time = VALUES(attempt_time),
@@ -111,7 +110,11 @@ public class DeliverySimpleDAO implements DeliveryDAO {
             }
 
             ps.setString(5, delivery.getUsername());
-            ps.setString(6, delivery.getStatus().name());
+            DeliveryResult status = delivery.getStatus();
+            if (status == null) {
+                status = DeliveryResult.INCOMPLETED;
+            }
+            ps.setString(6, status.name());
             ps.setTimestamp(7, Timestamp.from(delivery.getAttemptTime()));
             ps.setInt(8, delivery.getAttempts());
 

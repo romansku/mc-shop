@@ -82,6 +82,7 @@ public class OrderProcessor {
                         .orderId(order.getId())
                         .itemId(i.getId())
                         .username(order.getUsername())
+                        .status(DeliveryResult.INCOMPLETED)
                         .build())
                 .<Supplier<DeliveryResult>>map(d -> () -> deliveryProcessor.process(d))
                 .map(c -> CompletableFuture.supplyAsync(c, worker)

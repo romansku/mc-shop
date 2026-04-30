@@ -8,7 +8,6 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.node.types.InheritanceNode;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.game24.marketsync.model.DeliveryResult;
-import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -36,55 +35,68 @@ public class LuckPermsHook {
 
     public CompletableFuture<DeliveryResult> addPermission(String username, String permission, long expire, ChronoUnit unit) {
         CompletableFuture<DeliveryResult> future = new CompletableFuture<>();
+
         Consumer<User> modifyUserConsumer = user -> modifyUserPermission(user, permission, expire, unit, future);
-        return modifyUser(username, permission, modifyUserConsumer);
-    }
+        modifyUser(username, modifyUserConsumer, future);
 
-    private @NonNull CompletableFuture<DeliveryResult> modifyUser(String username,
-                                                                  String node,
-                                                                  Consumer<User> modifyUserAction) {
-        LuckPerms api = api();
-        if (api == null) {
-            plugin.getSLF4JLogger().error("LuckPerms API NOT INITIALIZED");
-            return CompletableFuture.completedFuture(DeliveryResult.FAILED);
-        }
-
-        return api.getUserManager().lookupUniqueId(username)
-                .thenCompose(uuid -> {
-                    CompletableFuture<DeliveryResult> result = new CompletableFuture<>();
-
-                    if (uuid == null) {
-                        plugin.getSLF4JLogger().warn("Unknown player '{}' on this server", username);
-                        result.complete(DeliveryResult.FAILED);
-                        return result;
-                    }
-
-                    api.getUserManager().modifyUser(uuid, modifyUserAction);
-
-                    return result;
-                })
+        return future
                 .orTimeout(10, TimeUnit.SECONDS)
                 .exceptionally(e -> {
-                    plugin.getSLF4JLogger().warn("Permission {} was not added to player {}", node, username, e);
+                    plugin.getSLF4JLogger().warn("Permission {} was not added to player {}", permission, username, e);
                     return DeliveryResult.INCOMPLETED;
                 });
     }
+
 
     public CompletableFuture<DeliveryResult> addGroup(String username, String group, long days) {
         return addGroup(username, group, days, ChronoUnit.DAYS);
     }
 
+
     public CompletableFuture<DeliveryResult> addGroup(String username, String group, long days, ChronoUnit unit) {
         CompletableFuture<DeliveryResult> future = new CompletableFuture<>();
+
         Consumer<User> modifyUserConsumer = user -> modifyUserGroup(user, group, days, unit, future);
-        return modifyUser(username, group, modifyUserConsumer);
+        modifyUser(username, modifyUserConsumer, future);
+
+        return future
+                .orTimeout(10, TimeUnit.SECONDS)
+                .exceptionally(e -> {
+                    plugin.getSLF4JLogger().warn("Group {} was not added to player {}", group, username, e);
+                    return DeliveryResult.INCOMPLETED;
+                });
+    }
+
+    private void modifyUser(String username,
+                            Consumer<User> modifyUserAction,
+                            CompletableFuture<DeliveryResult> completion) {
+
+        LuckPerms api = api();
+        if (api == null) {
+            plugin.getSLF4JLogger().error("LuckPerms API NOT INITIALIZED");
+            completion.complete(DeliveryResult.FAILED);
+            return;
+        }
+
+        api.getUserManager().lookupUniqueId(username)
+                .thenCompose(uuid -> {
+                    if (uuid == null) {
+                        plugin.getSLF4JLogger().warn("Unknown player '{}' on this server", username);
+                        completion.complete(DeliveryResult.FAILED);
+                        return completion;
+                    }
+
+                    api.getUserManager().modifyUser(uuid, modifyUserAction);
+
+                    return completion;
+                });
     }
 
     private void modifyUserPermission(User user,
                                       String permission,
                                       long expire,
                                       ChronoUnit unit,
-                                      CompletableFuture<DeliveryResult> result) {
+                                      CompletableFuture<DeliveryResult> completion) {
 
         Instant now = Instant.now();
         Instant expiring = user.data().toCollection().stream()
@@ -111,20 +123,20 @@ public class LuckPermsHook {
 
         if (mutateResult.wasSuccessful() || mutateResult == DataMutateResult.FAIL_ALREADY_HAS) {
             plugin.getSLF4JLogger().info("Permission {} was added to player {}", permission, user.getUsername());
-            result.complete(DeliveryResult.COMPLETED);
+            completion.complete(DeliveryResult.COMPLETED);
             return;
         }
 
         plugin.getSLF4JLogger().warn("Permission {} was not added to player {}; result: {}",
                 permission, user.getUsername(), mutateResult);
-        result.complete(DeliveryResult.INCOMPLETED);
+        completion.complete(DeliveryResult.INCOMPLETED);
     }
 
     private void modifyUserGroup(User user,
                                  String group,
                                  long expire,
                                  ChronoUnit unit,
-                                 CompletableFuture<DeliveryResult> result) {
+                                 CompletableFuture<DeliveryResult> completion) {
 
         Optional<InheritanceNode> existingGroup = user.getNodes().stream()
                 .filter(n -> n instanceof InheritanceNode)
@@ -139,7 +151,7 @@ public class LuckPermsHook {
             if (!in.hasExpiry()) {
                 plugin.getSLF4JLogger().warn("Group node is existing, but it is eternal; user {}, group {}",
                         user.getUsername(), group);
-                result.complete(DeliveryResult.FAILED);
+                completion.complete(DeliveryResult.FAILED);
                 return;
             }
 
@@ -147,7 +159,7 @@ public class LuckPermsHook {
             if (currentExpiry == null) {
                 plugin.getSLF4JLogger().error("Must never here, expiry exists but null; user {}, group {}",
                         user.getUsername(), group);
-                result.complete(DeliveryResult.FAILED);
+                completion.complete(DeliveryResult.FAILED);
                 return;
             }
 
@@ -173,13 +185,13 @@ public class LuckPermsHook {
 
         if (mutateResult.wasSuccessful() || mutateResult == DataMutateResult.FAIL_ALREADY_HAS) {
             plugin.getSLF4JLogger().info("Group {} was added to player {}", group, user.getUsername());
-            result.complete(DeliveryResult.COMPLETED);
+            completion.complete(DeliveryResult.COMPLETED);
             return;
         }
 
         plugin.getSLF4JLogger().warn("Group {} was not added to player {}; result: {}",
                 group, user.getUsername(), mutateResult);
-        result.complete(DeliveryResult.INCOMPLETED);
+        completion.complete(DeliveryResult.INCOMPLETED);
     }
 
 

@@ -41,7 +41,7 @@ public class CommandDeliveryService {
         }
 
         // lp user {player} permission settemp mshop.nickname.prefix.text true 365d
-        // prefix;;365;;DAYS
+        // LP;;perm;;prefix;;365;;DAYS
         String rawCMD = item.getData();
 
 
@@ -51,6 +51,7 @@ public class CommandDeliveryService {
             case "LP" -> switch (cmdArray[1]) {
                 case "perm" -> {
                     String permission = cmdArray[2];
+                    //todo: parse expiration
                     yield luckPermsHook.addPermission(username, permission, 180);
                 }
                 case "group" -> {
