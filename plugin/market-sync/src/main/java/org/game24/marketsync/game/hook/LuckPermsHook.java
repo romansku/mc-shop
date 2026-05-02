@@ -28,11 +28,6 @@ public class LuckPermsHook {
     }
 
 
-    public CompletableFuture<DeliveryResult> addPermission(String username, String permission, long expireDays) {
-        return this.addPermission(username, permission, expireDays, ChronoUnit.DAYS);
-    }
-
-
     public CompletableFuture<DeliveryResult> addPermission(String username, String permission, long expire, ChronoUnit unit) {
         CompletableFuture<DeliveryResult> future = new CompletableFuture<>();
 
@@ -45,11 +40,6 @@ public class LuckPermsHook {
                     plugin.getSLF4JLogger().warn("Permission {} was not added to player {}", permission, username, e);
                     return DeliveryResult.INCOMPLETED;
                 });
-    }
-
-
-    public CompletableFuture<DeliveryResult> addGroup(String username, String group, long days) {
-        return addGroup(username, group, days, ChronoUnit.DAYS);
     }
 
 

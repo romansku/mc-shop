@@ -13,3 +13,5 @@ dependencies:
       load: BEFORE
     PlayerPoints:
       load: BEFORE
+    PlaceholderAPI:
+      load: BEFORE
