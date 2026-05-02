@@ -24,10 +24,12 @@ public class CommandDeliveryService {
 
     private final PlayerPointsHook playerPointsHook;
 
-    public CommandDeliveryService(JavaPlugin plugin) {
+    public CommandDeliveryService(JavaPlugin plugin,
+                                  LuckPermsHook luckPermsHook,
+                                  PlayerPointsHook playerPointsHook) {
         this.logger = plugin.getSLF4JLogger();
-        this.luckPermsHook = new LuckPermsHook(plugin);
-        this.playerPointsHook = new PlayerPointsHook(plugin);
+        this.luckPermsHook = luckPermsHook;
+        this.playerPointsHook = playerPointsHook;
     }
 
     public CompletableFuture<DeliveryResult> completeCommandDelivery(@NonNull Delivery delivery, @NonNull Item item) {

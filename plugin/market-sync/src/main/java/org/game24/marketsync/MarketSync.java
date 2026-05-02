@@ -1,6 +1,7 @@
 package org.game24.marketsync;
 
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.game24.marketsync.config.MarketSyncConfig;
 import org.game24.marketsync.dao.Database;
@@ -12,6 +13,11 @@ import org.game24.marketsync.dao.impl.ItemSimpleDAO;
 import org.game24.marketsync.dao.impl.OrderSimpleDAO;
 import org.game24.marketsync.game.CommandDeliveryService;
 import org.game24.marketsync.game.ItemDeliveryService;
+import org.game24.marketsync.game.hook.LuckPermsHook;
+import org.game24.marketsync.game.hook.PlayerPointsHook;
+import org.game24.marketsync.game.listener.NicknameChangeListener;
+import org.game24.marketsync.game.placeholder.NickPlaceholderData;
+import org.game24.marketsync.game.placeholder.NicknamePlaceholderExpansion;
 import org.game24.marketsync.job.OrderProcessingJob;
 import org.game24.marketsync.processor.DeliveryProcessor;
 import org.game24.marketsync.processor.OrderProcessor;
@@ -42,13 +48,23 @@ public class MarketSync extends JavaPlugin {
 
     private ItemService itemService;
 
+    private LuckPermsHook luckPermsHook;
+
+    private PlayerPointsHook playerPointsHook;
+
     private ScheduledFuture<?> scheduledTask;
+
+    private NicknameChangeListener nicknameChangeListener;
+
+    private NicknamePlaceholderExpansion placeholderExpansion;
 
     @Override
     public void onEnable() {
         this.logger = this.getSLF4JLogger();
         initConfig();
         initServices();
+        initHooks();
+        initPlaceholders();
         startOrderProcessingJob();
     }
 
@@ -76,9 +92,16 @@ public class MarketSync extends JavaPlugin {
         itemService = new ItemService(itemDAO);
     }
 
+    private void initHooks() {
+        luckPermsHook = new LuckPermsHook(this);
+        playerPointsHook = new PlayerPointsHook(this);
+    }
+
     private void startOrderProcessingJob() {
         ItemDeliveryService itemDeliveryService = new ItemDeliveryService(this);
-        CommandDeliveryService commandDeliveryService = new CommandDeliveryService(this);
+        CommandDeliveryService commandDeliveryService = new CommandDeliveryService(this,
+                luckPermsHook,
+                playerPointsHook);
         DeliveryProcessor deliveryProcessor = new DeliveryProcessor(this,
                 deliveryService,
                 itemDeliveryService,
@@ -95,8 +118,27 @@ public class MarketSync extends JavaPlugin {
                 TimeUnit.MINUTES);
     }
 
+    private void initPlaceholders() {
+        NickPlaceholderData placeholderData = new NickPlaceholderData();
+
+        nicknameChangeListener = new NicknameChangeListener(this, placeholderData);
+        nicknameChangeListener.init();
+        Bukkit.getPluginManager().registerEvents(nicknameChangeListener, this);
+
+        placeholderExpansion = new NicknamePlaceholderExpansion(placeholderData);
+        placeholderExpansion.register();
+    }
+
     @Override
     public void onDisable() {
+        if (placeholderExpansion != null) {
+            placeholderExpansion.unregister();
+        }
+
+        if (nicknameChangeListener != null) {
+            nicknameChangeListener.destroy();
+        }
+
         shutdownOrderProcessingJob();
 
         if (database != null) {
