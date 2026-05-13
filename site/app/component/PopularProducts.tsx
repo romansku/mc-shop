@@ -71,7 +71,7 @@ export default function PopularProducts({ products }: PopularProductsProps) {
       {products.length === 0 ? (
         <p className={styles.emptyState}>
           Пока нет избранных товаров. Добавьте `favorite = true` в таблице
-          `cms_goods`.
+          `mshop_goods`.
         </p>
       ) : null}
 
