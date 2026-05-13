@@ -4,7 +4,7 @@ import { prisma } from "./prisma";
 import { toCmsItemModel, type CmsItemModel } from "@/app/models/cmsItem";
 
 export async function getAllItems(): Promise<CmsItemModel[]> {
-  const items = await prisma.cms_item.findMany({
+  const items = await prisma.mshop_items.findMany({
     orderBy: { id: "asc" },
   });
 
@@ -16,7 +16,7 @@ export async function getItemById(id: number): Promise<CmsItemModel | null> {
     return null;
   }
 
-  const item = await prisma.cms_item.findUnique({
+  const item = await prisma.mshop_items.findUnique({
     where: { id: BigInt(id) },
   });
 

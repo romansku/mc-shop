@@ -1,17 +1,17 @@
 import "server-only";
 
-import type { cms_goods } from "@prisma/client";
+import type { mshop_goods } from "@prisma/client";
 import { toCmsGoodsModel, type CmsGoodsModel } from "@/app/models/cmsGoods";
 import { prisma } from "./prisma";
 
 export type GoodsCard = CmsGoodsModel;
 
-function toGoodsCard(item: cms_goods): GoodsCard {
+function toGoodsCard(item: mshop_goods): GoodsCard {
   return toCmsGoodsModel(item);
 }
 
 export async function getAllSortByPrioritization(): Promise<GoodsCard[]> {
-  const goods = await prisma.cms_goods.findMany({
+  const goods = await prisma.mshop_goods.findMany({
     orderBy: {
       prioritization: "asc",
     },
@@ -21,7 +21,7 @@ export async function getAllSortByPrioritization(): Promise<GoodsCard[]> {
 }
 
 export async function getAllFavorites(): Promise<GoodsCard[]> {
-  const goods = await prisma.cms_goods.findMany({
+  const goods = await prisma.mshop_goods.findMany({
     where: {
       favorite: true,
     },
@@ -39,7 +39,7 @@ export async function getByIds(ids: number[]): Promise<GoodsCard[]> {
   }
 
   const idsAsBigInt = ids.map((id) => BigInt(id));
-  const goods = await prisma.cms_goods.findMany({
+  const goods = await prisma.mshop_goods.findMany({
     where: {
       id: {
         in: idsAsBigInt,
@@ -51,6 +51,6 @@ export async function getByIds(ids: number[]): Promise<GoodsCard[]> {
 
   return ids
     .map((id) => byId.get(id))
-    .filter((item): item is cms_goods => Boolean(item))
+    .filter((item): item is mshop_goods => Boolean(item))
     .map(toGoodsCard);
 }

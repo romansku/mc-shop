@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model cms_goods {
+model mshop_goods {
   id             BigInt          @id @default(autoincrement())
   name           String          @unique(map: "name") @db.VarChar(25)
   description    String?         @db.VarChar(500)
@@ -15,28 +15,28 @@ model cms_goods {
   prioritization Int
   price          Decimal         @db.Decimal(10, 2)
   image_link     String?         @db.VarChar(512)
-  cms_item_pack  cms_item_pack[]
+  mshop_item_packs  mshop_item_packs[]
 }
 
-model cms_item {
+model mshop_items {
   id            BigInt             @id @default(autoincrement())
-  item_type     cms_item_item_type
+  item_type     mshop_item_item_type
   data          String             @db.VarChar(150)
   amount        Int                @default(1)
-  cms_item_pack cms_item_pack[]
+  mshop_item_packs mshop_item_packs[]
 }
 
-model cms_item_pack {
+model mshop_item_packs {
   goods_id         BigInt
   included_item_id BigInt
-  cms_goods        cms_goods @relation(fields: [goods_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cms_goods")
-  cms_item         cms_item  @relation(fields: [included_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cms_items")
+  mshop_goods        mshop_goods @relation(fields: [goods_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mshop_goods")
+  mshop_items         mshop_items  @relation(fields: [included_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mshop_items")
 
   @@id([goods_id, included_item_id])
-  @@index([included_item_id], map: "fk_cms_items")
+  @@index([included_item_id], map: "fk_mshop_items")
 }
 
-enum cms_item_item_type {
+enum mshop_item_item_type {
   COMMAND
   ITEM
   PACK
@@ -61,10 +61,10 @@ model store_payment {
   created_at           DateTime @default(now()) @db.DateTime(3)
   updated_at           DateTime @updatedAt @db.DateTime(3)
 
-  @@index([external_payment_id], map: "idx_cms_store_payments_external")
-  @@index([status], map: "idx_cms_store_payments_status")
-  @@index([chain_tx_hash], map: "idx_cms_store_payments_chain_tx")
-  @@index([player_login], map: "idx_cms_store_payments_player_login")
-  @@index([created_at], map: "idx_cms_store_payments_created")
-  @@map("cms_store_payments")
+  @@index([external_payment_id], map: "idx_mshop_store_payments_external")
+  @@index([status], map: "idx_mshop_store_payments_status")
+  @@index([chain_tx_hash], map: "idx_mshop_store_payments_chain_tx")
+  @@index([player_login], map: "idx_mshop_store_payments_player_login")
+  @@index([created_at], map: "idx_mshop_store_payments_created")
+  @@map("mshop_store_payments")
 }

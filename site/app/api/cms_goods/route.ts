@@ -12,7 +12,7 @@ type CreateCmsGoodsRequest = {
 };
 
 export async function GET() {
-  const goods = await prisma.cms_goods.findMany({
+  const goods = await prisma.mshop_goods.findMany({
     orderBy: { prioritization: "asc" },
   });
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       throw new Error("Поле price обязательно и должно быть числом");
     }
 
-    const created = await prisma.cms_goods.create({
+    const created = await prisma.mshop_goods.create({
       data: {
         name: body.name.trim(),
         description: body.description ?? null,

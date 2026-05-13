@@ -1,4 +1,4 @@
-import type { cms_goods } from "@prisma/client";
+import type { mshop_goods } from "@prisma/client";
 
 export type CmsGoodsModel = {
   id: number;
@@ -10,7 +10,7 @@ export type CmsGoodsModel = {
   imageLink: string | null;
 };
 
-export function toCmsGoodsModel(row: cms_goods): CmsGoodsModel {
+export function toCmsGoodsModel(row: mshop_good): CmsGoodsModel {
   return {
     id: Number(row.id),
     name: row.name,

@@ -8,7 +8,7 @@ export async function getItemsPackByGoodsId(goodsId: number): Promise<CmsItemPac
     return [];
   }
 
-  const links = await prisma.cms_item_pack.findMany({
+  const links = await prisma.mshop_item_packs.findMany({
     where: { goods_id: BigInt(goodsId) },
     orderBy: { included_item_id: "asc" },
   });
