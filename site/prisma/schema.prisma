@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model cms_goods {
+  id             BigInt          @id @default(autoincrement())
+  name           String          @unique(map: "name") @db.VarChar(25)
+  description    String?         @db.VarChar(500)
+  favorite       Boolean         @default(false)
+  prioritization Int
+  price          Decimal         @db.Decimal(10, 2)
+  image_link     String?         @db.VarChar(512)
+  cms_item_pack  cms_item_pack[]
+}
+
+model cms_item {
+  id            BigInt             @id @default(autoincrement())
+  item_type     cms_item_item_type
+  data          String             @db.VarChar(150)
+  amount        Int                @default(1)
+  cms_item_pack cms_item_pack[]
+}
+
+model cms_item_pack {
+  goods_id         BigInt
+  included_item_id BigInt
+  cms_goods        cms_goods @relation(fields: [goods_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cms_goods")
+  cms_item         cms_item  @relation(fields: [included_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_cms_items")
+
+  @@id([goods_id, included_item_id])
+  @@index([included_item_id], map: "fk_cms_items")
+}
+
+enum cms_item_item_type {
+  COMMAND
+  ITEM
+  PACK
+}
+
+model store_payment {
+  id                   BigInt   @id @default(autoincrement())
+  provider             String   @db.VarChar(32)
+  status               String   @default("AWAITING_PAYMENT") @db.VarChar(32)
+  fiat_currency        String   @default("USD") @db.VarChar(8)
+  amount_fiat          Decimal  @db.Decimal(12, 2)
+  player_login         String   @db.VarChar(32)
+  pay_currency         String?  @db.VarChar(32)
+  pay_amount_expected  Decimal? @db.Decimal(20, 8)
+  pay_address          String?  @db.VarChar(128)
+  external_payment_id  String?  @db.VarChar(80)
+  chain_tx_hash        String?  @db.VarChar(120)
+  invoice_url          String?  @db.VarChar(512)
+  cart_snapshot        String   @db.Text
+  last_ipn_payload     String?  @db.LongText
+  chain_confirmed_at   DateTime? @db.DateTime(3)
+  created_at           DateTime @default(now()) @db.DateTime(3)
+  updated_at           DateTime @updatedAt @db.DateTime(3)
+
+  @@index([external_payment_id], map: "idx_cms_store_payments_external")
+  @@index([status], map: "idx_cms_store_payments_status")
+  @@index([chain_tx_hash], map: "idx_cms_store_payments_chain_tx")
+  @@index([player_login], map: "idx_cms_store_payments_player_login")
+  @@index([created_at], map: "idx_cms_store_payments_created")
+  @@map("cms_store_payments")
+}
