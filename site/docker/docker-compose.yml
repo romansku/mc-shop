@@ -1,0 +1,46 @@
+# Запуск из корня репозитория:
+#   docker compose -f docker/docker-compose.yml up --build
+#
+# Сайт: http://localhost:3000
+# MySQL: localhost:3306 (user minecrafter / DB minecraft-store)
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: minecraft-store-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: minecraft-store
+      MYSQL_USER: minecrafter
+      MYSQL_PASSWORD: minecrafter1488
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: http://localhost:3000
+    container_name: minecraft-store-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: mysql://minecrafter:minecrafter1488@mysql:3306/minecraft-store
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

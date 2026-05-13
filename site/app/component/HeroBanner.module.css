@@ -1,0 +1,19 @@
+.banner {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #38bdf8;
+  border-radius: 20px;
+  min-height: 380px;
+  box-shadow: 0 20px 38px rgba(2, 6, 23, 0.45), 0 0 0 1px rgba(250, 204, 21, 0.3);
+}
+
+.imageWrap {
+  position: absolute;
+  inset: 0;
+}
+
+.image {
+  position: absolute;
+  object-fit: cover;
+  filter: saturate(1.2) contrast(1.08) brightness(1.06);
+}

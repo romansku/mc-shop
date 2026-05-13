@@ -1,0 +1,135 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(34, 197, 94, 0.14) 0%, rgba(2, 6, 23, 0) 45%),
+    radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.14) 0%, rgba(2, 6, 23, 0) 42%),
+    #020617;
+  color: #f8fafc;
+}
+
+.main {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.section {
+  border: 1px solid #166534;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(20, 83, 45, 0.22) 0%, rgba(2, 6, 23, 0.92) 100%);
+  padding: 24px;
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.title {
+  margin: 0;
+  color: #fde047;
+}
+
+.total {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.emptyState {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid #14532d;
+  border-radius: 12px;
+  background: #0b1120;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.cardTitle {
+  margin: 0 0 6px;
+}
+
+.cardDescription {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.price {
+  font-weight: 700;
+  color: #fde047;
+}
+
+.removeButton,
+.clearButton {
+  border: 1px solid rgba(56, 189, 248, 0.6);
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.8);
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.removeButton:hover,
+.clearButton:hover {
+  background: rgba(51, 65, 85, 0.95);
+}
+
+.clearButton {
+  justify-self: flex-start;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.payButton {
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  color: #052e16;
+  font-size: 0.9rem;
+  font-weight: 800;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.payButton:hover {
+  filter: brightness(1.06);
+}
+
+@media (min-width: 640px) {
+  .main {
+    padding-inline: 24px;
+  }
+}
