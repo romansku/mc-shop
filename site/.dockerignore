@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.idea
+.env
+.env.*
+!.env.example
+npm-debug.log*
+*.md
+coverage
+.cursor
+terminals

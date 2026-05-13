@@ -1,0 +1,158 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.panel {
+  width: min(520px, 100%);
+  max-height: min(90vh, 720px);
+  overflow: auto;
+  border: 1px solid #166534;
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 83, 45, 0.35) 0%,
+    rgba(2, 6, 23, 0.98) 100%
+  );
+  padding: 22px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fde047;
+}
+
+.close {
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.9);
+  color: #e2e8f0;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.close:hover {
+  background: rgba(51, 65, 85, 0.95);
+}
+
+.loginBlock {
+  margin-bottom: 18px;
+}
+
+.loginLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.loginInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.loginInput:focus {
+  border-color: #38bdf8;
+}
+
+.loginHint {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.loginError {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: #fca5a5;
+}
+
+.methodButtonDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.methodButtonDisabled:hover {
+  border-color: #14532d;
+  transform: none;
+}
+
+.chooseGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.methodButton {
+  text-align: left;
+  border: 1px solid #14532d;
+  border-radius: 14px;
+  background: #0b1120;
+  padding: 16px;
+  cursor: pointer;
+  color: #f8fafc;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.methodButton:hover {
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.methodTitle {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.methodDesc {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.back {
+  margin-bottom: 14px;
+  border: none;
+  background: transparent;
+  color: #7dd3fc;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
