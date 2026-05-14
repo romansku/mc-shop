@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS mshop_deliveries
     pack_id_idx  BIGINT AS (IFNULL(pack_id, -1)) VIRTUAL,
 
     PRIMARY KEY (id),
-    CONSTRAINT fk__delivery__item_id__player_order__item_id FOREIGN KEY (item_id) REFERENCES mshop_order_items (item_id),
-    CONSTRAINT fk__delivery__order_id__player_order__order_id FOREIGN KEY (order_id) REFERENCES mshop_order_items (order_id),
-    CONSTRAINT fk__delivery__pack_id__player_order__order_id FOREIGN KEY (pack_id) REFERENCES mshop_order_items (item_id)
+    CONSTRAINT fk__delivery__item_id__player_order__item_id FOREIGN KEY (item_id) REFERENCES mshop_items (id),
+    CONSTRAINT fk__delivery__order_id__player_order__order_id FOREIGN KEY (order_id) REFERENCES mshop_items (id),
+    CONSTRAINT fk__delivery__pack_id__player_order__order_id FOREIGN KEY (pack_id) REFERENCES mshop_items (id)
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS u_idx__delivery__order_item_pack ON mshop_deliveries (order_id, item_id, pack_id_idx);

@@ -28,7 +28,9 @@ public class ItemSimpleDAO implements ItemDAO {
 
     @Override
     public Item find(long id) {
-        String sql = "select * from mshop_items where id = ?";
+        String sql = """
+                select id, item_type, data, amount
+                from mshop_items where id = ?""";
 
         try (Connection conn = database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
