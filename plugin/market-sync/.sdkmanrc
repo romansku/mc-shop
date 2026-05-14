@@ -1,0 +1,2 @@
+# sdk env (в этой папке): Corretto 25 — полный идентификатор в SDKMAN
+java=25.0.1-amzn

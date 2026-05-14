@@ -52,7 +52,7 @@ public class OrderSimpleDAO implements OrderDAO {
                     orderToItems.computeIfAbsent(orderId, ignore -> new ArrayList<>())
                             .add(Item.builder()
                                     .id(rs.getLong("item_id"))
-                                    .type(ItemType.valueOf(rs.getString("item_type"))) // enum безопаснее через valueOf
+                                    .type(ItemType.valueOf(rs.getString("item_type")))
                                     .data(rs.getString("data"))
                                     .count(rs.getInt("amount"))
                                     .build());

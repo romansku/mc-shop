@@ -13,4 +13,4 @@ services:
     restart: unless-stopped
 
 networks:
-  markey_sync_backend:
+  mc_shop_backend:
