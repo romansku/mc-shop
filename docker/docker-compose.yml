@@ -12,5 +12,20 @@ services:
       MYSQL_ROOT_PASSWORD: market_sync_db_root
     restart: unless-stopped
 
+  market_sync_site:
+    build:
+      context: ../site
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - mc_shop_backend
+      - mc_shop_frontend
+    environment:
+      DATABASE_URL: "mysql://market_sync_db:market_sync_db@market_sync_db:3306/market_sync_db"
+      STATIC_USDT_TRC20_ADDRESS: "TTNMWr219NJ8k1RKMaEv4wzrqJK3WraUcd"
+
+
 networks:
-  markey_sync_backend:
+  mc_shop_backend:
+  mc_shop_frontend:

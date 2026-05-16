@@ -1,7 +1,7 @@
--- Платежи интернет-магазина (префикс cms_ для единообразия с остальными таблицами CMS)
+-- Платежи интернет-магазина (префикс mshop_ для единообразия с остальными таблицами CMS)
 -- Выполните вручную или через миграцию, если ещё не создано.
 
-CREATE TABLE IF NOT EXISTS cms_store_payments
+CREATE TABLE IF NOT EXISTS mshop_store_payments
 (
     id                   BIGINT         NOT NULL AUTO_INCREMENT,
     provider             VARCHAR(32)    NOT NULL COMMENT 'NOWPAYMENTS | STATIC_USDT_TRC20',
@@ -22,11 +22,11 @@ CREATE TABLE IF NOT EXISTS cms_store_payments
     updated_at           DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (id),
-    KEY idx_cms_store_payments_external (external_payment_id),
-    KEY idx_cms_store_payments_status (status),
-    KEY idx_cms_store_payments_chain_tx (chain_tx_hash),
-    KEY idx_cms_store_payments_player_login (player_login),
-    KEY idx_cms_store_payments_created (created_at)
+    KEY idx_mshop_store_payments_external (external_payment_id),
+    KEY idx_mshop_store_payments_status (status),
+    KEY idx_mshop_store_payments_chain_tx (chain_tx_hash),
+    KEY idx_mshop_store_payments_player_login (player_login),
+    KEY idx_mshop_store_payments_created (created_at)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
