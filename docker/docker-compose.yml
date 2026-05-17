@@ -23,7 +23,7 @@ services:
       - mc_shop_frontend
     environment:
       DATABASE_URL: "mysql://market_sync_db:market_sync_db@market_sync_db:3306/market_sync_db"
-      STATIC_USDT_TRC20_ADDRESS: "TTNMWr219NJ8k1RKMaEv4wzrqJK3WraUcd"
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
 
 
 networks:
