@@ -7,33 +7,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model mshop_goods {
-  id             BigInt          @id @default(autoincrement())
-  name           String          @unique(map: "name") @db.VarChar(25)
-  description    String?         @db.VarChar(500)
-  favorite       Boolean         @default(false)
-  prioritization Int
-  price          Decimal         @db.Decimal(10, 2)
-  image_link     String?         @db.VarChar(512)
-  mshop_item_packs  mshop_item_packs[]
-}
-
 model mshop_items {
-  id            BigInt             @id @default(autoincrement())
-  item_type     mshop_item_item_type
-  data          String             @db.VarChar(150)
-  amount        Int                @default(1)
-  mshop_item_packs mshop_item_packs[]
+  id                          BigInt              @id @default(autoincrement())
+  item_type                   mshop_item_item_type
+  data                        String              @db.VarChar(150)
+  amount                      Int                 @default(1)
+  name                        String              @unique(map: "uq__mshop_items__name") @db.VarChar(25)
+  description                 String              @db.VarChar(500)
+  favorite                    Boolean             @default(false)
+  prioritization              Int
+  price                       Decimal             @db.Decimal(10, 2)
+  image_link                  String?             @db.VarChar(512)
+  active                      Boolean             @default(false)
+  mshop_item_packs_as_parent  mshop_item_packs[]  @relation("ItemPackParent")
+  mshop_item_packs_as_child   mshop_item_packs[]  @relation("ItemPackChild")
+  mshop_order_items           mshop_order_items[]
 }
 
 model mshop_item_packs {
-  goods_id         BigInt
-  included_item_id BigInt
-  mshop_goods        mshop_goods @relation(fields: [goods_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mshop_goods")
-  mshop_items         mshop_items  @relation(fields: [included_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mshop_items")
+  parent_item_id BigInt
+  child_item_id  BigInt
+  parent_item    mshop_items @relation("ItemPackParent", fields: [parent_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk__item_pack__parent_item_id__item__id")
+  child_item     mshop_items @relation("ItemPackChild", fields: [child_item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk__item_pack__child_item_id__item__id")
 
-  @@id([goods_id, included_item_id])
-  @@index([included_item_id], map: "fk_mshop_items")
+  @@id([parent_item_id, child_item_id])
+  @@index([child_item_id], map: "idx__item_pack__child_item_id")
+}
+
+model mshop_player_orders {
+  id                    BigInt                @id @default(autoincrement())
+  user_name             String                @db.VarChar(25)
+  email                 String                @db.VarChar(255)
+  payment_method        mshop_payment_method
+  payment_type          String?               @db.VarChar(32)
+  amount                Decimal               @db.Decimal(12, 2)
+  amount_currency       String                @default("RUB") @db.VarChar(8)
+  created_date          DateTime?             @default(now()) @db.Timestamp(0)
+  delivered_date        DateTime?             @db.Timestamp(0)
+  payment_id            BigInt?
+  yoomoney_operation_id String?               @unique(map: "uq_mshop_player_orders_yoomoney_operation_id") @db.VarChar(64)
+  yoomoney_sender       String?               @db.VarChar(32)
+  yoomoney_payload      String?               @db.LongText
+  status                mshop_order_status
+  mshop_order_items     mshop_order_items[]
+
+  @@index([payment_method], map: "idx_mshop_player_orders_payment_method")
+  @@index([status], map: "idx_mshop_player_orders_status")
+  @@map("mshop_player_orders")
+}
+
+model mshop_order_items {
+  order_id             BigInt
+  item_id              BigInt
+  mshop_player_orders  mshop_player_orders @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk__order_item__order_id__player_order__id")
+  mshop_items          mshop_items         @relation(fields: [item_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk__order_item__item_id__item__id")
+
+  @@id([order_id, item_id])
+  @@index([item_id], map: "fk__order_item__item_id__item__id")
+  @@map("mshop_order_items")
 }
 
 enum mshop_item_item_type {
@@ -42,29 +73,16 @@ enum mshop_item_item_type {
   PACK
 }
 
-model store_payment {
-  id                   BigInt   @id @default(autoincrement())
-  provider             String   @db.VarChar(32)
-  status               String   @default("AWAITING_PAYMENT") @db.VarChar(32)
-  fiat_currency        String   @default("USD") @db.VarChar(8)
-  amount_fiat          Decimal  @db.Decimal(12, 2)
-  player_login         String   @db.VarChar(32)
-  pay_currency         String?  @db.VarChar(32)
-  pay_amount_expected  Decimal? @db.Decimal(20, 8)
-  pay_address          String?  @db.VarChar(128)
-  external_payment_id  String?  @db.VarChar(80)
-  chain_tx_hash        String?  @db.VarChar(120)
-  invoice_url          String?  @db.VarChar(512)
-  cart_snapshot        String   @db.Text
-  last_ipn_payload     String?  @db.LongText
-  chain_confirmed_at   DateTime? @db.DateTime(3)
-  created_at           DateTime @default(now()) @db.DateTime(3)
-  updated_at           DateTime @updatedAt @db.DateTime(3)
+enum mshop_payment_method {
+  CRYPTO
+  PAYPAL
+  YOOMONEY
+}
 
-  @@index([external_payment_id], map: "idx_mshop_store_payments_external")
-  @@index([status], map: "idx_mshop_store_payments_status")
-  @@index([chain_tx_hash], map: "idx_mshop_store_payments_chain_tx")
-  @@index([player_login], map: "idx_mshop_store_payments_player_login")
-  @@index([created_at], map: "idx_mshop_store_payments_created")
-  @@map("mshop_store_payments")
+enum mshop_order_status {
+  DRAFT
+  CREATED
+  PAID
+  COMPLETED
+  CANCELLED
 }

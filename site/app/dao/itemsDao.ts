@@ -1,17 +1,17 @@
 import "server-only";
 
 import { prisma } from "./prisma";
-import { toCmsItemModel, type CmsItemModel } from "@/app/models/cmsItem";
+import { toMshopItemModel, type MshopItemModel } from "@/app/models/mshopItem";
 
-export async function getAllItems(): Promise<CmsItemModel[]> {
+export async function getAllItems(): Promise<MshopItemModel[]> {
   const items = await prisma.mshop_items.findMany({
     orderBy: { id: "asc" },
   });
 
-  return items.map(toCmsItemModel);
+  return items.map(toMshopItemModel);
 }
 
-export async function getItemById(id: number): Promise<CmsItemModel | null> {
+export async function getItemById(id: number): Promise<MshopItemModel | null> {
   if (!Number.isInteger(id) || id <= 0) {
     return null;
   }
@@ -20,5 +20,5 @@ export async function getItemById(id: number): Promise<CmsItemModel | null> {
     where: { id: BigInt(id) },
   });
 
-  return item ? toCmsItemModel(item) : null;
+  return item ? toMshopItemModel(item) : null;
 }

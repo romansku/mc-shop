@@ -38,3 +38,22 @@ build/
 ### Mac OS ###
 .DS_Store
 ./.idea
+
+### Site (Next.js) ###
+/site/node_modules/
+/site/.next/
+/site/out/
+/site/coverage/
+/site/.turbo/
+/site/.eslintcache
+/site/.vercel/
+/site/package-lock.json
+/site/npm-debug.log*
+/site/yarn-debug.log*
+/site/yarn-error.log*
+/site/pnpm-debug.log*
+/site/.env
+/site/.env.local
+/site/.env.development.local
+/site/.env.test.local
+/site/.env.production.local

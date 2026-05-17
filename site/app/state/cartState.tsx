@@ -1,16 +1,16 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import type { GoodsCard } from "@/app/dao/goodsDao";
+import type { ItemCard } from "@/app/dao/itemsCatalogDao";
 
 const STORAGE_KEY = "minecraft-store-cart-v1";
 
-export type CartItem = GoodsCard;
+export type CartItem = ItemCard;
 
 type CartStateValue = {
   items: CartItem[];
   total: number;
-  addItem: (item: GoodsCard) => void;
+  addItem: (item: ItemCard) => void;
   removeItem: (id: number) => void;
   clearCart: () => void;
   hasItem: (id: number) => boolean;
@@ -44,17 +44,20 @@ function parseItems(value: string | null): CartItem[] {
 }
 
 export function CartStateProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") {
-      return [];
-    }
-
-    return parseItems(window.localStorage.getItem(STORAGE_KEY));
-  });
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setItems(parseItems(window.localStorage.getItem(STORAGE_KEY)));
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+  }, [items, hydrated]);
 
   const value = useMemo<CartStateValue>(() => {
     return {

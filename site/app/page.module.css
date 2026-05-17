@@ -17,6 +17,10 @@
   gap: 32px;
 }
 
+.homeMain {
+  padding-bottom: 16px;
+}
+
 @media (min-width: 640px) {
   .main {
     padding-inline: 24px;
