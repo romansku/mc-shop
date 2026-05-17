@@ -23,6 +23,26 @@ VALUES (1, 'COMMAND', 'PP;;give;;100', 1, '100 Points', 'Малый пакет �
        (16, 'PACK', 'no data', 1, 'Набор «Старт»', 'Статус VIP на 31 день\n220 премиум монет', 0, 400.00)
 ;
 
+UPDATE mshop_items SET image_link = '/items/points-100.webp' WHERE name = '100 Points';
+UPDATE mshop_items SET image_link = '/items/points-220.webp' WHERE name = '220 Points';
+UPDATE mshop_items SET image_link = '/items/points-580.webp' WHERE name = '580 Points';
+UPDATE mshop_items SET image_link = '/items/points-1250.webp' WHERE name = '1250 Points';
+
+UPDATE mshop_items SET image_link = '/items/prefix-text.webp' WHERE name = 'Префикс: текст';
+UPDATE mshop_items SET image_link = '/items/prefix-color.webp' WHERE name = 'Префикс: цвет';
+UPDATE mshop_items SET image_link = '/items/suffix-text.webp' WHERE name = 'Суффикс: текст';
+UPDATE mshop_items SET image_link = '/items/suffix-color.webp' WHERE name = 'Суффикс: цвет';
+UPDATE mshop_items SET image_link = '/items/chat-color.webp' WHERE name = 'Цвет текста в чате';
+UPDATE mshop_items SET image_link = '/items/name-color.webp' WHERE name = 'Цвет имени';
+
+UPDATE mshop_items SET image_link = '/items/vip-7.webp' WHERE name = 'VIP · 7 дней';
+UPDATE mshop_items SET image_link = '/items/vip-31.webp' WHERE name = 'VIP · 31 день';
+UPDATE mshop_items SET image_link = '/items/vip-92.webp' WHERE name = 'VIP · 92 дня';
+UPDATE mshop_items SET image_link = '/items/vip-183.webp' WHERE name = 'VIP · 183 дня';
+UPDATE mshop_items SET image_link = '/items/vip-365.webp' WHERE name = 'VIP · 1 год';
+
+UPDATE mshop_items SET image_link = '/items/starter-pack.webp' WHERE name = 'Набор «Старт»';
+
 INSERT INTO mshop_item_packs (parent_item_id, child_item_id)
 VALUES (16, 2),
        (16, 12);

@@ -1,17 +1,17 @@
 import "server-only";
 
 import { prisma } from "./prisma";
-import { toCmsItemPackModel, type CmsItemPackModel } from "@/app/models/cmsItemPack";
+import { toMshopItemPackModel, type MshopItemPackModel } from "@/app/models/mshopItemPack";
 
-export async function getItemsPackByGoodsId(goodsId: number): Promise<CmsItemPackModel[]> {
-  if (!Number.isInteger(goodsId) || goodsId <= 0) {
+export async function getItemsPackByParentItemId(parentItemId: number): Promise<MshopItemPackModel[]> {
+  if (!Number.isInteger(parentItemId) || parentItemId <= 0) {
     return [];
   }
 
   const links = await prisma.mshop_item_packs.findMany({
-    where: { goods_id: BigInt(goodsId) },
-    orderBy: { included_item_id: "asc" },
+    where: { parent_item_id: BigInt(parentItemId) },
+    orderBy: { child_item_id: "asc" },
   });
 
-  return links.map(toCmsItemPackModel);
+  return links.map(toMshopItemPackModel);
 }

@@ -36,21 +36,31 @@ CREATE TABLE IF NOT EXISTS mshop_item_packs
 -- order
 CREATE TABLE IF NOT EXISTS mshop_player_orders
 (
-    id             BIGINT                    NOT NULL AUTO_INCREMENT,
-    user_name      VARCHAR(25)               NOT NULL,
-    email          VARCHAR(255)              NOT NULL,
-    payment_method ENUM ('CRYPTO', 'PAYPAL') NOT NULL,
-    created_date   TIMESTAMP,
-    delivered_date TIMESTAMP,
-    payment_id     BIGINT, -- no SQL relation for few payments systems
-    status         ENUM (
-        'DRAFT',           -- user created order
-        'CREATED',         -- the order is validated and invoice is prepared
-        'PAID',            -- the user have paid the order
-        'COMPLETED',       -- the order is delivered to the user
-        'CANCELLED'        -- the order is canceled
-        )                                    NOT NULL,
-    PRIMARY KEY (id)
+    id                    BIGINT                                         NOT NULL AUTO_INCREMENT,
+    user_name             VARCHAR(25)                                    NOT NULL,
+    email                 VARCHAR(255)                                   NOT NULL,
+    payment_method        ENUM ('CRYPTO', 'PAYPAL', 'YOOMONEY')         NOT NULL,
+    payment_type          VARCHAR(8)                                     NULL COMMENT 'PC | AC',
+    amount                DECIMAL(12, 2)                                NOT NULL COMMENT 'Сумма инвойса',
+    amount_currency       VARCHAR(8)                                     NOT NULL DEFAULT 'RUB',
+    created_date          TIMESTAMP                                      NULL DEFAULT CURRENT_TIMESTAMP,
+    delivered_date        TIMESTAMP                                      NULL,
+    payment_id            BIGINT                                         NULL,
+    yoomoney_operation_id VARCHAR(64)                                    NULL,
+    yoomoney_sender       VARCHAR(32)                                    NULL,
+    yoomoney_payload      LONGTEXT                                       NULL,
+    status                ENUM (
+        'DRAFT',
+        'CREATED',
+        'PAID',
+        'COMPLETED',
+        'CANCELLED'
+        )                                                                NOT NULL,
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_mshop_player_orders_yoomoney_operation_id (yoomoney_operation_id),
+    KEY idx_mshop_player_orders_status (status),
+    KEY idx_mshop_player_orders_payment_method (payment_method)
 );
 
 -- items for order
