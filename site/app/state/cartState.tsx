@@ -48,8 +48,12 @@ export function CartStateProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setItems(parseItems(window.localStorage.getItem(STORAGE_KEY)));
-    setHydrated(true);
+    // Hydrate cart from localStorage after mount (SSR renders empty cart first).
+    const stored = parseItems(window.localStorage.getItem(STORAGE_KEY));
+    queueMicrotask(() => {
+      setItems(stored);
+      setHydrated(true);
+    });
   }, []);
 
   useEffect(() => {
