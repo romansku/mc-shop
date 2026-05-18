@@ -1,0 +1,131 @@
+.section {
+  border: 1px solid #166534;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(20, 83, 45, 0.22) 0%, rgba(2, 6, 23, 0.92) 100%);
+  padding: 24px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  color: #fde047;
+}
+
+.search {
+  width: min(360px, 100%);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.search:focus {
+  border-color: #38bdf8;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.card {
+  border: 1px solid #14532d;
+  border-radius: 14px;
+  background: #0b1120;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  height: 170px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #1e293b;
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+}
+
+.image {
+  object-fit: cover;
+}
+
+.imagePlaceholder {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+  font-size: 0.86rem;
+}
+
+.cardTitle {
+  margin: 0;
+  color: #f0fdf4;
+}
+
+.cardDescription {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.cardFooter {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fde047;
+}
+
+.addButton {
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #facc15 0%, #eab308 100%);
+  color: #1f2937;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.addButton:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.emptyState {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
