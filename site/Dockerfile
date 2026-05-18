@@ -11,6 +11,8 @@ COPY package.json package-lock.json* ./
 # postinstall runs prisma generate — schema must exist before npm ci
 COPY prisma ./prisma
 RUN npm ci
+# Ensure Linux native optional binaries are present in container builds.
+RUN npm install --no-save lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu @next/swc-linux-x64-gnu
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
