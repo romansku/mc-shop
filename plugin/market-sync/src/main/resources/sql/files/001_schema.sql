@@ -91,11 +91,3 @@ CREATE TABLE IF NOT EXISTS mshop_crypto_payments
 );
 
 CREATE INDEX IF NOT EXISTS idx__player_order__username ON mshop_player_orders (user_name);
-
-ALTER DATABASE market_sync_db
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-ALTER TABLE mshop_items
-    CONVERT TO CHARACTER SET utf8mb4
-        COLLATE utf8mb4_unicode_ci;
