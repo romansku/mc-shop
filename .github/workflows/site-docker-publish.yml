@@ -10,7 +10,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/mс-shop-site
+  IMAGE_NAME: ${{ github.repository_owner }}/mc-shop-site
 
 jobs:
   docker:
