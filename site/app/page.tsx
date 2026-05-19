@@ -13,7 +13,9 @@ export default async function Home() {
     <div className={styles.page}>
       <main className={`${styles.main} ${styles.homeMain}`}>
         <HeroBanner />
-        <PopularProducts products={favoriteItems} />
+        {favoriteItems.length > 0 ? (
+          <PopularProducts products={favoriteItems} />
+        ) : null}
       </main>
     </div>
   );
