@@ -156,3 +156,20 @@
 .back:hover {
   text-decoration: underline;
 }
+
+.legalNotice {
+  margin: 12px 0 14px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.legalLink {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legalLink:hover {
+  color: #94a3b8;
+}

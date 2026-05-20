@@ -18,6 +18,11 @@ type Step = "choose" | "yoomoney";
 type ApiError = { ok: false; message: string };
 type YooMoneyResponse = CreateYooMoneyOrderResponseBody | ApiError;
 
+const legalLinks = {
+  userAgreement: "https://mc-s3.game-24.org/rift-mc/docs/user_agreement.pdf",
+  privacy: "https://mc-s3.game-24.org/rift-mc/docs/privacy.pdf",
+};
+
 export default function Payment({
   open,
   onClose,
@@ -241,13 +246,35 @@ export default function Payment({
               </label>
             </div>
 
+            <p className={styles.legalNotice}>
+              Нажимая кнопку «Оплатить», вы принимаете условия{" "}
+              <a
+                href={legalLinks.userAgreement}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.legalLink}
+              >
+                Пользовательского соглашения
+              </a>{" "}
+              и даете согласие на обработку персональных данных в соответствии с{" "}
+              <a
+                href={legalLinks.privacy}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.legalLink}
+              >
+                Политикой конфиденциальности
+              </a>
+              .
+            </p>
+
             <button
               type="button"
               className={styles.methodButton}
               onClick={() => void createYooMoneyInvoice()}
               disabled={loading}
             >
-              {loading ? "Создаем заказ..." : "Создать счет ЮMoney"}
+              {loading ? "Создаем заказ..." : "Оплатить"}
             </button>
 
             {error ? <p className={styles.loginError}>{error}</p> : null}
