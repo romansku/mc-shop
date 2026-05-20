@@ -16,6 +16,13 @@
   gap: 16px;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .logoLink {
   display: inline-flex;
   align-items: center;
@@ -40,6 +47,65 @@
   image-rendering: auto;
 }
 
+.serverWrap {
+  position: relative;
+}
+
+.serverLink {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #bae6fd;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(56, 189, 248, 0.4);
+  text-underline-offset: 3px;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease,
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.serverLink:hover {
+  color: #fde047;
+  text-decoration-color: rgba(250, 204, 21, 0.7);
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.serverLink:focus-visible {
+  outline: 2px solid rgba(56, 189, 248, 0.8);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.copyToast {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  white-space: nowrap;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  line-height: 1;
+  border: 1px solid transparent;
+  background: rgba(2, 6, 23, 0.96);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.45);
+  z-index: 20;
+}
+
+.copyToastSuccess {
+  color: #86efac;
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.copyToastError {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -48,6 +114,9 @@
 }
 
 .navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border-radius: 8px;
   padding: 6px 10px;
   color: #f8fafc;
@@ -62,6 +131,21 @@
   background-color: rgba(251, 191, 36, 0.2);
   color: #fde047;
   transform: translateY(-1px);
+}
+
+.cartBadge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #052e16;
+  background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
 }
 
 @media (min-width: 640px) {

@@ -1,0 +1,2 @@
+ALTER TABLE mshop_items
+    MODIFY COLUMN description VARCHAR(40) NOT NULL;
