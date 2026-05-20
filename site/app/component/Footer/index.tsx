@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./Footer.module.css";
 
 const links = {
@@ -14,29 +15,67 @@ export default function Footer() {
       <div className={styles.container}>
         <div className={styles.infoBlock}>
           <h2 className={styles.title}>Контакты</h2>
+          <div className={styles.socialRow}>
+            <a
+              href={links.telegram}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.socialLink}
+            >
+              <Image
+                src="/telegram.svg"
+                alt=""
+                width={18}
+                height={18}
+                aria-hidden
+                className={styles.socialIcon}
+              />
+              <span>Telegram</span>
+            </a>
+            <a
+              href={links.discord}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.socialLink}
+            >
+              <Image
+                src="/discord.svg"
+                alt=""
+                width={18}
+                height={18}
+                aria-hidden
+                className={styles.socialIcon}
+              />
+              <span>Discord</span>
+            </a>
+          </div>
           <p className={styles.text}>
             Нужна помощь с покупкой или выдачей привилегий? Напишите нам в
             соцсети - обычно отвечаем быстро.
           </p>
         </div>
 
-        <div className={styles.linksBlock}>
+        <nav className={styles.legalBlock} aria-label="Документы">
           <a
-            href={links.telegram}
+            href={links.userAgreement}
             target="_blank"
             rel="noreferrer"
-            className={styles.link}
+            className={styles.legalLink}
           >
             Telegram
           </a>
+          <span className={styles.legalSep} aria-hidden="true">
+            ·
+          </span>
           <a
-            href={links.discord}
+            href={links.privacy}
             target="_blank"
             rel="noreferrer"
-            className={styles.link}
+            className={styles.legalLink}
           >
             Discord
           </a>
+        </nav>
         </div>
 
         <nav className={styles.legalBlock} aria-label="Документы">
