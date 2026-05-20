@@ -62,29 +62,6 @@ export default function Footer() {
             rel="noreferrer"
             className={styles.legalLink}
           >
-            Telegram
-          </a>
-          <span className={styles.legalSep} aria-hidden="true">
-            ·
-          </span>
-          <a
-            href={links.privacy}
-            target="_blank"
-            rel="noreferrer"
-            className={styles.legalLink}
-          >
-            Discord
-          </a>
-        </nav>
-        </div>
-
-        <nav className={styles.legalBlock} aria-label="Документы">
-          <a
-            href={links.userAgreement}
-            target="_blank"
-            rel="noreferrer"
-            className={styles.legalLink}
-          >
             Пользовательское соглашение
           </a>
           <span className={styles.legalSep} aria-hidden="true">
@@ -99,7 +76,7 @@ export default function Footer() {
             Политика конфиденциальности
           </a>
         </nav>
-      </div>
+        </div>
     </footer>
   );
 }
