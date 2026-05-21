@@ -50,6 +50,7 @@ export default function ShopCatalog({ products }: ShopCatalogProps) {
                     src={product.imageLink}
                     alt={product.name}
                     fill
+                    unoptimized
                     className={styles.image}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cdnCommon } from "@/lib/cdnImages";
 import Footer from "./component/Footer";
 import Header from "./component/Header";
 import "./globals.css";
@@ -20,11 +21,19 @@ export const metadata: Metadata = {
   description: "Rift MC - уютное ванильное выживание без Pay2Win и вайпов.",
   icons: {
     icon: [
-      { url: "/server-icon.png", type: "image/png", sizes: "any" },
-      { url: "/server-icon.png?v=3", type: "image/png", sizes: "32x32" },
+      { url: cdnCommon("server-icon.png"), type: "image/png", sizes: "any" },
+      {
+        url: `${cdnCommon("server-icon.png")}?v=3`,
+        type: "image/png",
+        sizes: "32x32",
+      },
     ],
-    shortcut: [{ url: "/server-icon.png?v=3", type: "image/png" }],
-    apple: [{ url: "/server-icon.png?v=3", type: "image/png" }],
+    shortcut: [
+      { url: `${cdnCommon("server-icon.png")}?v=3`, type: "image/png" },
+    ],
+    apple: [
+      { url: `${cdnCommon("server-icon.png")}?v=3`, type: "image/png" },
+    ],
   },
 };
 

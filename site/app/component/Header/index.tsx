@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { cdnCommon } from "@/lib/cdnImages";
 import { useCartState } from "@/app/state/cartState";
 import styles from "./Header.module.css";
 
@@ -33,11 +34,12 @@ export default function Header() {
         <div className={styles.brand}>
           <Link href="/" className={styles.logoLink} aria-label="На главную">
             <Image
-              src="/server-name.png"
+              src={cdnCommon("server-name.png")}
               alt="RIFT MC"
               width={320}
               height={80}
               priority
+              unoptimized
               className={styles.logoImage}
             />
           </Link>

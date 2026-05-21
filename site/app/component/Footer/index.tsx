@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { cdnCommon } from "@/lib/cdnImages";
 import styles from "./Footer.module.css";
 
 const links = {
@@ -23,10 +24,11 @@ export default function Footer() {
               className={styles.socialLink}
             >
               <Image
-                src="/telegram.svg"
+                src={cdnCommon("telegram.svg")}
                 alt=""
                 width={18}
                 height={18}
+                unoptimized
                 aria-hidden
                 className={styles.socialIcon}
               />
@@ -39,10 +41,11 @@ export default function Footer() {
               className={styles.socialLink}
             >
               <Image
-                src="/discord.svg"
+                src={cdnCommon("discord.svg")}
                 alt=""
                 width={18}
                 height={18}
+                unoptimized
                 aria-hidden
                 className={styles.socialIcon}
               />
