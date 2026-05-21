@@ -18,6 +18,6 @@ public class PlayerRegistryListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onRegister(RegisterEvent event) {
         Player player = event.getPlayer();
-        playerRegistryService.saveIfAbsent(player.getUniqueId(), player.getName());
+        playerRegistryService.markRegistered(player.getUniqueId(), player.getName());
     }
 }

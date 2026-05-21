@@ -14,8 +14,12 @@ public class PlayerRegistryService {
         this.playerDAO = playerDAO;
     }
 
-    public boolean saveIfAbsent(UUID uuid, String username) {
-        return playerDAO.saveIfAbsent(uuid, username);
+    public boolean saveBotIfAbsent(UUID uuid, String username) {
+        return playerDAO.saveBotIfAbsent(uuid, username);
+    }
+
+    public boolean markRegistered(UUID uuid, String username) {
+        return playerDAO.markRegistered(uuid, username);
     }
 
     public Set<UUID> findExistingUuids(Collection<UUID> uuids) {
