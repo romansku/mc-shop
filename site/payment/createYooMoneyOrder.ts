@@ -8,7 +8,8 @@ const YOOMONEY_ACTION_URL = "https://yoomoney.ru/quickpay/confirm";
 function getReceiverWallet(): string {
   const wallet = process.env.YOOMONEY_WALLET?.trim();
   if (!wallet) {
-    throw new Error("Не задан YOOMONEY_WALLET в .env");
+      console.error("Not found YOOMONEY data");
+      throw new Error("Что-то идет не так, попробуйте позже");
   }
   return wallet;
 }
