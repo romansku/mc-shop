@@ -8,14 +8,17 @@ import org.game24.marketsync.dao.Database;
 import org.game24.marketsync.dao.DeliveryDAO;
 import org.game24.marketsync.dao.ItemDAO;
 import org.game24.marketsync.dao.OrderDAO;
+import org.game24.marketsync.dao.PlayerDAO;
 import org.game24.marketsync.dao.impl.DeliverySimpleDAO;
 import org.game24.marketsync.dao.impl.ItemSimpleDAO;
 import org.game24.marketsync.dao.impl.OrderSimpleDAO;
+import org.game24.marketsync.dao.impl.PlayerSimpleDAO;
 import org.game24.marketsync.game.CommandDeliveryService;
 import org.game24.marketsync.game.ItemDeliveryService;
 import org.game24.marketsync.game.hook.LuckPermsHook;
 import org.game24.marketsync.game.hook.PlayerPointsHook;
 import org.game24.marketsync.game.listener.NicknameChangeListener;
+import org.game24.marketsync.game.listener.PlayerRegistryListener;
 import org.game24.marketsync.game.placeholder.NickPlaceholderData;
 import org.game24.marketsync.game.placeholder.NicknamePlaceholderExpansion;
 import org.game24.marketsync.job.OrderProcessingJob;
@@ -24,6 +27,8 @@ import org.game24.marketsync.processor.OrderProcessor;
 import org.game24.marketsync.service.DeliveryService;
 import org.game24.marketsync.service.ItemService;
 import org.game24.marketsync.service.OrderService;
+import org.game24.marketsync.service.PlayerRegistryService;
+import org.game24.marketsync.sync.PlayerBootstrapSync;
 import org.slf4j.Logger;
 
 import java.util.concurrent.Executors;
@@ -48,6 +53,8 @@ public class MarketSync extends JavaPlugin {
 
     private ItemService itemService;
 
+    private PlayerRegistryService playerRegistryService;
+
     private LuckPermsHook luckPermsHook;
 
     private PlayerPointsHook playerPointsHook;
@@ -63,6 +70,10 @@ public class MarketSync extends JavaPlugin {
         this.logger = this.getSLF4JLogger();
         initConfig();
         initServices();
+        if (!isEnabled()) {
+            return;
+        }
+        initPlayerRegistry();
         initHooks();
         initPlaceholders();
         startOrderProcessingJob();
@@ -90,6 +101,14 @@ public class MarketSync extends JavaPlugin {
 
         ItemDAO itemDAO = new ItemSimpleDAO(database, logger);
         itemService = new ItemService(itemDAO);
+
+        PlayerDAO playerDAO = new PlayerSimpleDAO(database, logger);
+        playerRegistryService = new PlayerRegistryService(playerDAO);
+    }
+
+    private void initPlayerRegistry() {
+        Bukkit.getPluginManager().registerEvents(new PlayerRegistryListener(playerRegistryService), this);
+        orderProcessingExecutor.execute(new PlayerBootstrapSync(playerRegistryService, logger));
     }
 
     private void initHooks() {
