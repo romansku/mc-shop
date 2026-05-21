@@ -1,9 +1,10 @@
 package org.game24.marketsync.game.listener;
 
+import fr.xephi.authme.events.RegisterEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.game24.marketsync.service.PlayerRegistryService;
 
 public class PlayerRegistryListener implements Listener {
@@ -15,7 +16,8 @@ public class PlayerRegistryListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onPreLogin(AsyncPlayerPreLoginEvent event) {
-        playerRegistryService.saveIfAbsent(event.getUniqueId(), event.getName());
+    public void onRegister(RegisterEvent event) {
+        Player player = event.getPlayer();
+        playerRegistryService.saveIfAbsent(player.getUniqueId(), player.getName());
     }
 }

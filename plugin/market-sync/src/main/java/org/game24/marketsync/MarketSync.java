@@ -15,6 +15,7 @@ import org.game24.marketsync.dao.impl.OrderSimpleDAO;
 import org.game24.marketsync.dao.impl.PlayerSimpleDAO;
 import org.game24.marketsync.game.CommandDeliveryService;
 import org.game24.marketsync.game.ItemDeliveryService;
+import org.game24.marketsync.game.hook.AuthMeHook;
 import org.game24.marketsync.game.hook.LuckPermsHook;
 import org.game24.marketsync.game.hook.PlayerPointsHook;
 import org.game24.marketsync.game.listener.NicknameChangeListener;
@@ -107,8 +108,10 @@ public class MarketSync extends JavaPlugin {
     }
 
     private void initPlayerRegistry() {
+        AuthMeHook authMeHook = new AuthMeHook(this);
         Bukkit.getPluginManager().registerEvents(new PlayerRegistryListener(playerRegistryService), this);
-        orderProcessingExecutor.execute(new PlayerBootstrapSync(playerRegistryService, logger));
+        PlayerBootstrapSync bootstrapTask = new PlayerBootstrapSync(playerRegistryService, authMeHook, logger);
+        Thread.ofVirtual().name("market-sync-player-bootstrap").start(bootstrapTask);
     }
 
     private void initHooks() {
