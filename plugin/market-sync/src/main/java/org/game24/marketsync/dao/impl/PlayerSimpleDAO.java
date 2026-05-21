@@ -32,14 +32,14 @@ public class PlayerSimpleDAO implements PlayerDAO {
     }
 
     @Override
-    public boolean saveIfAbsent(UUID uuid, String username) {
+    public boolean saveBotIfAbsent(UUID uuid, String username) {
         if (uuid == null || username == null || username.isBlank()) {
             return false;
         }
 
         String sql = """
-                INSERT IGNORE INTO mshop_players (uuid, username)
-                VALUES (?, ?)
+                INSERT IGNORE INTO mshop_players (uuid, username, registered)
+                VALUES (?, ?, 0)
                 """;
 
         try (Connection conn = database.getConnection();
@@ -50,7 +50,32 @@ public class PlayerSimpleDAO implements PlayerDAO {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            logger.error("Error saving player uuid={}, username={}", uuid, username, e);
+            logger.error("Error saving bot uuid={}, username={}", uuid, username, e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean markRegistered(UUID uuid, String username) {
+        if (uuid == null || username == null || username.isBlank()) {
+            return false;
+        }
+
+        String sql = """
+                INSERT INTO mshop_players (uuid, username, registered)
+                VALUES (?, ?, 1)
+                ON DUPLICATE KEY UPDATE registered = 1, username = VALUES(username)
+                """;
+
+        try (Connection conn = database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, uuid.toString());
+            ps.setString(2, username.toLowerCase(Locale.ROOT));
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            logger.error("Error marking player registered uuid={}, username={}", uuid, username, e);
             return false;
         }
     }
@@ -64,19 +89,20 @@ public class PlayerSimpleDAO implements PlayerDAO {
         List<UUID> uuidList = uuids instanceof List<UUID> list ? list : new ArrayList<>(uuids);
         Set<UUID> existing = new HashSet<>();
         for (int offset = 0; offset < uuidList.size(); offset += EXISTING_UUID_BATCH_SIZE) {
-            existing.addAll(findExistingUuidsBatch(uuidList, offset, EXISTING_UUID_BATCH_SIZE));
+            existing.addAll(findExistingUuidsBatch(uuidList, offset));
         }
         return existing;
     }
 
-    private Set<UUID> findExistingUuidsBatch(List<UUID> uuidList, int offset, int batchSize) {
-        int end = Math.min(offset + batchSize, uuidList.size());
+    private Set<UUID> findExistingUuidsBatch(List<UUID> uuidList, int offset) {
+        int end = Math.min(offset + PlayerSimpleDAO.EXISTING_UUID_BATCH_SIZE, uuidList.size());
         List<UUID> batch = uuidList.subList(offset, end);
         if (batch.isEmpty()) {
             return Collections.emptySet();
         }
 
-        S3shop_players WHERE uuid IN (" + placeholders + ")";
+        String placeholders = batch.stream().map(_ -> "?").collect(Collectors.joining(", "));
+        String sql = "SELECT uuid FROM mshop_players WHERE uuid IN (" + placeholders + ")";
 
         Set<UUID> existing = new HashSet<>();
         try (Connection conn = database.getConnection();

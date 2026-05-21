@@ -35,13 +35,13 @@ public class PlayerBootstrapSync implements Runnable {
             return;
         }
 
-        logger.info("Starting to collect registered players");
+        logger.info("Starting player bootstrap sync");
 
         List<PlayerCandidate> candidates = collectCandidates();
         int candidatesCount = candidates.size();
         int alreadyInDb = 0;
-        int notRegistered = 0;
-        int inserted = 0;
+        int insertedRegistered = 0;
+        int insertedBots = 0;
         int skipped = 0;
 
         for (int offset = 0; offset < candidates.size(); offset += PlayerSimpleDAO.EXISTING_UUID_BATCH_SIZE) {
@@ -57,13 +57,14 @@ public class PlayerBootstrapSync implements Runnable {
                     continue;
                 }
 
-                if (!authMeHook.isRegistered(candidate.username())) {
-                    notRegistered++;
-                    continue;
-                }
-
-                if (playerRegistryService.saveIfAbsent(candidate.uuid(), candidate.username())) {
-                    inserted++;
+                if (authMeHook.isRegistered(candidate.username())) {
+                    if (playerRegistryService.markRegistered(candidate.uuid(), candidate.username())) {
+                        insertedRegistered++;
+                    } else {
+                        skipped++;
+                    }
+                } else if (playerRegistryService.saveBotIfAbsent(candidate.uuid(), candidate.username())) {
+                    insertedBots++;
                 } else {
                     skipped++;
                 }
@@ -71,8 +72,8 @@ public class PlayerBootstrapSync implements Runnable {
         }
 
         logger.info(
-                "Player bootstrap sync finished: candidates={}, alreadyInDb={}, notRegistered={}, inserted={}, skipped={}",
-                candidatesCount, alreadyInDb, notRegistered, inserted, skipped);
+                "Player bootstrap sync finished: candidates={}, alreadyInDb={}, insertedRegistered={}, insertedBots={}, skipped={}",
+                candidatesCount, alreadyInDb, insertedRegistered, insertedBots, skipped);
     }
 
     private List<PlayerCandidate> collectCandidates() {
