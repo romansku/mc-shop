@@ -79,6 +79,14 @@
         </dependency>
 
         <dependency>
+            <groupId>fr.xephi.authme</groupId>
+            <artifactId>AuthMe</artifactId>
+            <version>5.7.0-FORK-b53</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/AuthMe-5.7.0-FORK-Universal.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.11.4</version>

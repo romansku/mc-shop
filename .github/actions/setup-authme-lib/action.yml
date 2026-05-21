@@ -1,0 +1,30 @@
+name: Setup AuthMe compile lib
+description: Download and cache AuthMe jar for Maven system-scope dependency
+
+runs:
+  using: composite
+  steps:
+    - name: Cache AuthMe jar
+      uses: actions/cache@v4
+      with:
+        path: plugin/market-sync/libs
+        key: authme-jar-5.7.0-FORK-b53-modrinth-oezVemzR
+        restore-keys: |
+          authme-jar-
+
+    - name: Download AuthMe jar
+      shell: bash
+      run: |
+        set -euo pipefail
+        LIB_DIR="plugin/market-sync/libs"
+        JAR="${LIB_DIR}/AuthMe-5.7.0-FORK-Universal.jar"
+        URL="https://cdn.modrinth.com/data/3IEZ9vol/versions/oezVemzR/AuthMe-5.7.0-FORK-Universal.jar"
+
+        mkdir -p "${LIB_DIR}"
+        if [ ! -f "${JAR}" ]; then
+          echo "Downloading AuthMe from Modrinth..."
+          curl -fsSL -o "${JAR}" "${URL}"
+        else
+          echo "Using cached AuthMe jar at ${JAR}"
+        fi
+        ls -la "${LIB_DIR}"

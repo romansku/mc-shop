@@ -9,6 +9,8 @@ bootstrapper: org.game24.marketsync.init.MarketSyncBootstrap
 
 dependencies:
   server:
+    AuthMe:
+      load: BEFORE
     LuckPerms:
       load: BEFORE
     PlayerPoints:
