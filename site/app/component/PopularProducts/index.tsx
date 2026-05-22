@@ -96,7 +96,7 @@ export default function PopularProducts({ products }: PopularProductsProps) {
               )}
             </div>
             <div>
-              <h3 className={styles.cardTitle}>Товар {product.name}</h3>
+              <h3 className={styles.cardTitle}>{product.name}</h3>
               <p className={styles.cardDescription}>
                 {product.description ?? "Описание скоро появится."}
               </p>

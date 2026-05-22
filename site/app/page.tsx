@@ -14,22 +14,34 @@ export default async function Home() {
       <main className={`${styles.main} ${styles.homeMain}`}>
         <HeroBanner />
         <section className={styles.introSection}>
-          <h1 className={styles.introTitle}>
-            Rift MC - сервер про нормальное Minecraft-выживание
-          </h1>
-          <p className={styles.introText}>
-            Без модов, без Pay2Win и без продажи силы. Вещи добываются руками,
-            базы строятся неделями, а экономика формируется самими игроками.
-          </p>
-          <p className={styles.introText}>
-            Мы сохраняем ванильный дух Minecraft и добавляем только то, что
-            делает игру удобнее: приваты, дома, телепорты и базовые команды.
-            Донат дает комфорт и косметику, но не преимущество в бою.
-          </p>
-          <p className={styles.introHint}>
-            PvP разрешено, но мы за честную игру и уважение. И да - без вайпов:
-            если строите большое, оно останется надолго.
-          </p>
+          <div className={styles.introInner}>
+            <h1 className={styles.introTitle}>
+              Rift MC — сервер про Minecraft-выживание
+            </h1>
+            <p className={styles.introText}>
+              Без модов, без Pay2Win и без продажи силы.<br/>
+              Вещи добываются руками, базы строятся неделями, а экономика формируется самими игроками.
+              <br/><br/>
+              Мы сохраняем ванильный дух Minecraft и добавляем только то, что
+              делает игру удобнее:
+            </p>
+            <ul className={styles.introList}>
+              <li>большие приваты</li>
+              <li>несколько домов</li>
+              <li>телепорты</li>
+              <li>удобное меню</li>
+            </ul>
+
+            <p className={styles.introText}>
+              Философия сервера может уместиться в паре фраз:
+            </p>
+
+            <ul className={`${styles.introList}`}>
+                <li>PvP разрешено, но мы за честную игру и уважение</li>
+                <li>Донат даёт комфорт и косметику, но не преимущества в бою и добыче</li>
+                <li>Без вайпов: если строите большое, не переживайте о сносе мира</li>
+            </ul>
+          </div>
         </section>
         {favoriteItems.length > 0 ? (
           <PopularProducts products={favoriteItems} />
