@@ -56,6 +56,16 @@ model mshop_player_orders {
   @@map("mshop_player_orders")
 }
 
+model mshop_players {
+  uuid       String   @id @db.Char(36)
+  username   String   @db.VarChar(25)
+  registered Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+
+  @@index([username], map: "idx_mshop_players_username")
+  @@map("mshop_players")
+}
+
 model mshop_order_items {
   order_id             BigInt
   item_id              BigInt

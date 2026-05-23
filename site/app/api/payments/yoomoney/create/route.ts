@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createYooMoneyOrder } from "@/payment/createYooMoneyOrder";
 import { resolveOrderPricing } from "@/payment/resolveOrderPricing";
+import { resolveRegisteredPlayer } from "@/payment/resolveRegisteredPlayer";
 import { validateCreateYooMoneyOrderBody } from "@/payment/validateYooMoneyOrder";
 
 export async function POST(request: Request) {
@@ -16,6 +17,11 @@ export async function POST(request: Request) {
     const validated = validateCreateYooMoneyOrderBody(body);
     if (!validated.ok) {
       return NextResponse.json({ ok: false, message: validated.message }, { status: 400 });
+    }
+
+    const player = await resolveRegisteredPlayer(validated.playerLogin);
+    if (!player.ok) {
+      return NextResponse.json({ ok: false, message: player.message }, { status: 400 });
     }
 
     const pricing = await resolveOrderPricing(validated.itemIds, validated.totalAmountHint);
