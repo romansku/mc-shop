@@ -74,7 +74,7 @@ export default function CartPage() {
         open={paymentOpen}
         onClose={() => setPaymentOpen(false)}
         items={items}
-        totalUsd={total}
+        total={total}
         onPaymentCreated={clearCart}
       />
     </div>

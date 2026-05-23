@@ -1,13 +1,11 @@
-export type CartLineSnapshot = {
+export type CreateOrderLineRequest = {
   id: number;
-  name: string;
-  price: number;
 };
 
 export type YooMoneyPaymentType = "YOOMONEY_WALLET" | "CARD";
 
 export type CreateYooMoneyOrderRequestBody = {
-  items: CartLineSnapshot[];
+  items: CreateOrderLineRequest[];
   totalAmount: number;
   playerLogin: string;
   email: string;

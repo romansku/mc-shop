@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createYooMoneyOrder } from "@/payment/createYooMoneyOrder";
+import { resolveOrderPricing } from "@/payment/resolveOrderPricing";
 import { validateCreateYooMoneyOrderBody } from "@/payment/validateYooMoneyOrder";
 
 export async function POST(request: Request) {
@@ -17,7 +18,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: validated.message }, { status: 400 });
     }
 
-    const payload = await createYooMoneyOrder(validated);
+    const pricing = await resolveOrderPricing(validated.itemIds, validated.totalAmountHint);
+    if (!pricing.ok) {
+      return NextResponse.json({ ok: false, message: pricing.message }, { status: 400 });
+    }
+
+    const payload = await createYooMoneyOrder({
+      itemIds: pricing.data.itemIds,
+      totalAmount: pricing.data.totalAmount,
+      playerLogin: validated.playerLogin,
+      email: validated.email,
+      paymentType: validated.paymentType,
+    });
     return NextResponse.json(payload);
   } catch (error) {
     return NextResponse.json(
