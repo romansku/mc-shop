@@ -10,7 +10,7 @@ type PaymentProps = {
   open: boolean;
   onClose: () => void;
   items: ItemCard[];
-  totalUsd: number;
+  total: number;
   onPaymentCreated: () => void;
 };
 
@@ -27,7 +27,7 @@ export default function Payment({
   open,
   onClose,
   items,
-  totalUsd,
+  total,
   onPaymentCreated,
 }: PaymentProps) {
   const [step, setStep] = useState<Step>("choose");
@@ -42,7 +42,7 @@ export default function Payment({
     [playerLogin],
   );
   const emailValid = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()), [email]);
-  const canContinue = loginCheck.ok && emailValid && items.length > 0 && totalUsd > 0;
+  const canContinue = loginCheck.ok && emailValid && items.length > 0 && total > 0;
 
   function submitYooMoneyForm(order: CreateYooMoneyOrderResponseBody) {
     const form = document.createElement("form");
@@ -83,8 +83,8 @@ export default function Payment({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: items.map((item) => ({ id: item.id, name: item.name, price: item.price })),
-          totalAmount: totalUsd,
+          items: items.map((item) => ({ id: item.id })),
+          totalAmount: total,
           playerLogin: loginCheck.login,
           email: email.trim(),
           paymentType,
@@ -220,7 +220,7 @@ export default function Payment({
             <p className={styles.methodDesc}>
               Игрок: <strong>{loginCheck.ok ? loginCheck.login : "-"}</strong>
               <br />
-              Сумма заказа: <strong>{totalUsd.toFixed(2)} ₽</strong>
+              Сумма заказа: <strong>{total.toFixed(2)} ₽</strong>
             </p>
 
             <div className={styles.chooseGrid}>

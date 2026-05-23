@@ -1,4 +1,4 @@
-import type { CartLineSnapshot, YooMoneyPaymentType } from "./types";
+import type { YooMoneyPaymentType } from "./types";
 import { validatePlayerLogin } from "./validatePlayerLogin";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,8 +30,8 @@ export function validateCreateYooMoneyOrderBody(body: {
 }):
   | {
       ok: true;
-      items: CartLineSnapshot[];
-      totalAmount: number;
+      itemIds: number[];
+      totalAmountHint: number;
       playerLogin: string;
       email: string;
       paymentType: YooMoneyPaymentType;
@@ -41,36 +41,25 @@ export function validateCreateYooMoneyOrderBody(body: {
     return { ok: false, message: "Корзина пуста" };
   }
 
-  const parsedItems: CartLineSnapshot[] = [];
+  const itemIds: number[] = [];
   for (const row of body.items) {
     if (typeof row !== "object" || row === null) {
       return { ok: false, message: "Некорректные позиции корзины" };
     }
-    const r = row as Record<string, unknown>;
-    const id = Number(r.id);
-    const name = r.name;
-    const price = Number(r.price);
+    const id = Number((row as Record<string, unknown>).id);
     if (!Number.isInteger(id) || id <= 0) {
       return { ok: false, message: "Некорректный id товара" };
     }
-    if (typeof name !== "string" || name.trim().length === 0) {
-      return { ok: false, message: "Некорректное имя товара" };
-    }
-    if (!Number.isFinite(price) || price <= 0) {
-      return { ok: false, message: "Некорректная цена товара" };
-    }
-    parsedItems.push({ id, name: name.trim(), price });
+    itemIds.push(id);
   }
 
-  const totalAmount = Number(body.totalAmount);
-  if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+  if (new Set(itemIds).size !== itemIds.length) {
+    return { ok: false, message: "В корзине не должно быть одинаковых товаров" };
+  }
+
+  const totalAmountHint = Number(body.totalAmount);
+  if (!Number.isFinite(totalAmountHint) || totalAmountHint <= 0) {
     return { ok: false, message: "Некорректная сумма заказа" };
-  }
-
-  const cartTotal = Math.round(parsedItems.reduce((acc, item) => acc + item.price, 0) * 100) / 100;
-  const roundedTotal = Math.round(totalAmount * 100) / 100;
-  if (cartTotal !== roundedTotal) {
-    return { ok: false, message: "Сумма заказа не совпадает с корзиной" };
   }
 
   const login = validatePlayerLogin(body.playerLogin);
@@ -90,8 +79,8 @@ export function validateCreateYooMoneyOrderBody(body: {
 
   return {
     ok: true,
-    items: parsedItems,
-    totalAmount: roundedTotal,
+    itemIds,
+    totalAmountHint,
     playerLogin: login.login,
     email: email.email,
     paymentType: paymentType.paymentType,

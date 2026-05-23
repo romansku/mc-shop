@@ -1,30 +1,32 @@
 import "server-only";
 
 import { prisma } from "@/app/dao/prisma";
-import type { CartLineSnapshot, CreateYooMoneyOrderResponseBody, YooMoneyPaymentType } from "./types";
+import { formatOrderAmount } from "./money";
+import type { CreateYooMoneyOrderResponseBody, YooMoneyPaymentType } from "./types";
 
 const YOOMONEY_ACTION_URL = "https://yoomoney.ru/quickpay/confirm";
 
 function getReceiverWallet(): string {
   const wallet = process.env.YOOMONEY_WALLET?.trim();
   if (!wallet) {
-      console.error("Not found YOOMONEY data");
-      throw new Error("Что-то идет не так, попробуйте позже");
+    console.error("Not found YOOMONEY data");
+    throw new Error("Что-то идет не так, попробуйте позже");
   }
   return wallet;
 }
 
 export async function createYooMoneyOrder(params: {
-  items: CartLineSnapshot[];
+  itemIds: number[];
   totalAmount: number;
   playerLogin: string;
   email: string;
   paymentType: YooMoneyPaymentType;
 }): Promise<CreateYooMoneyOrderResponseBody> {
   const receiver = getReceiverWallet();
+  const amountStr = formatOrderAmount(params.totalAmount);
 
   return await prisma.$transaction(async (tx) => {
-    const parentItemIds = params.items.map((item) => BigInt(item.id));
+    const parentItemIds = params.itemIds.map((id) => BigInt(id));
     const packRows = await tx.mshop_item_packs.findMany({
       where: { parent_item_id: { in: parentItemIds } },
       select: { child_item_id: true },
@@ -34,7 +36,6 @@ export async function createYooMoneyOrder(params: {
       new Set(packRows.map((row) => row.child_item_id.toString())),
     ).map((id) => BigInt(id));
 
-    // Fallback: if pack links are absent, treat selected catalog items as order items.
     if (childItemIds.length === 0) {
       childItemIds = parentItemIds;
     }
@@ -45,7 +46,7 @@ export async function createYooMoneyOrder(params: {
         email: params.email,
         payment_method: "YOOMONEY",
         payment_type: params.paymentType,
-        amount: params.totalAmount.toFixed(2),
+        amount: amountStr,
         amount_currency: "RUB",
         status: "CREATED",
       },
@@ -65,7 +66,7 @@ export async function createYooMoneyOrder(params: {
       ok: true,
       orderId,
       receiver,
-      sum: params.totalAmount.toFixed(2),
+      sum: amountStr,
       label: orderId,
       paymentType: params.paymentType,
       actionUrl: YOOMONEY_ACTION_URL,
