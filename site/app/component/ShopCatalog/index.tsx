@@ -12,6 +12,7 @@ type ShopCatalogProps = {
 
 export default function ShopCatalog({ products }: ShopCatalogProps) {
   const [query, setQuery] = useState("");
+  const [infoOpen, setInfoOpen] = useState(false);
   const { addItem, hasItem } = useCartState();
 
   const filtered = useMemo(() => {
@@ -36,6 +37,34 @@ export default function ShopCatalog({ products }: ShopCatalogProps) {
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Поиск по названию..."
         />
+      </div>
+
+      <div className={styles.infoBlock}>
+        <button
+          type="button"
+          className={styles.infoToggle}
+          onClick={() => setInfoOpen((open) => !open)}
+          aria-expanded={infoOpen}
+          aria-controls="shop-purchase-info"
+        >
+          <span className={styles.burger} aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+          <span className={styles.infoToggleLabel}>Условия покупки</span>
+        </button>
+        <div
+          id="shop-purchase-info"
+          className={`${styles.infoPanel} ${infoOpen ? styles.infoPanelOpen : ""}`}
+          aria-hidden={!infoOpen}
+        >
+          <p className={styles.infoText}>
+            Все товары в магазине действуют ограниченное время. Если вы покупаете
+            позицию, которая у вас уже есть, срок владения продлевается на период,
+            указанный для этого товара.
+          </p>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
