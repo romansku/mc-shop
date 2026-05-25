@@ -43,4 +43,23 @@ public class MarketSyncConfig {
     public int getJobDelay() {
         return this.config.getInt("job.delay-minutes");
     }
+
+    public AntiBrightnessConfig getAntiBrightnessConfig() {
+        return new AntiBrightnessConfig(
+                this.config.getBoolean("anti-brightness.enabled", true),
+                this.config.getInt("anti-brightness.light-threshold", 1),
+                this.config.getLong("anti-brightness.min-interval-ms", 2000),
+                this.config.getInt("anti-brightness.warning-threshold", 3),
+                this.config.getLong("anti-brightness.warning-window-ms", 10000),
+                this.config.getInt("anti-brightness.punishment-threshold", 4),
+                this.config.getLong("anti-brightness.punishment-window-ms", 15000),
+                this.config.getInt("anti-brightness.punishment-duration-seconds", 10),
+                this.config.getInt("anti-brightness.decay-interval-seconds", 10),
+                this.config.getString("anti-brightness.bypass-permission", "marketsync.antibrightness.bypass"),
+                this.config.getString(
+                        "anti-brightness.warning-message",
+                        "Всевидящее око чует запретную магию в этой тьме. Оставь ее, иначе мрак сам взыщет с нарушителя."
+                )
+        );
+    }
 }
