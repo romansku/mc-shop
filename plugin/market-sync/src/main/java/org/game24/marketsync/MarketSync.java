@@ -2,6 +2,7 @@ package org.game24.marketsync;
 
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.game24.marketsync.config.AntiBrightnessConfig;
 import org.game24.marketsync.config.MarketSyncConfig;
@@ -16,8 +17,10 @@ import org.game24.marketsync.dao.impl.OrderSimpleDAO;
 import org.game24.marketsync.dao.impl.PlayerSimpleDAO;
 import org.game24.marketsync.game.CommandDeliveryService;
 import org.game24.marketsync.game.ItemDeliveryService;
+import org.game24.marketsync.game.antibrightness.AntiBrightnessAdminAlerter;
 import org.game24.marketsync.game.antibrightness.AntiBrightnessDecayJob;
 import org.game24.marketsync.game.antibrightness.AntiBrightnessTracker;
+import org.game24.marketsync.game.command.MarketSyncCommand;
 import org.game24.marketsync.game.hook.AuthMeHook;
 import org.game24.marketsync.game.hook.LuckPermsHook;
 import org.game24.marketsync.game.hook.PlayerPointsHook;
@@ -70,6 +73,12 @@ public class MarketSync extends JavaPlugin {
 
     private NicknamePlaceholderExpansion placeholderExpansion;
 
+    private AntiBrightnessTracker antiBrightnessTracker;
+
+    private AntiBrightnessListener antiBrightnessListener;
+
+    private AntiBrightnessAdminAlerter antiBrightnessAdminAlerter;
+
     private AntiBrightnessDecayJob antiBrightnessDecayJob;
 
     private Thread antiBrightnessDecayThread;
@@ -85,8 +94,14 @@ public class MarketSync extends JavaPlugin {
         initPlayerRegistry();
         initHooks();
         initAntiBrightness();
+        initCommands();
         initPlaceholders();
         startOrderProcessingJob();
+    }
+
+    public void reloadPluginConfig() {
+        config.reload(this);
+        reloadAntiBrightnessConfig();
     }
 
     private void initConfig() {
@@ -130,20 +145,51 @@ public class MarketSync extends JavaPlugin {
 
     private void initAntiBrightness() {
         AntiBrightnessConfig antiBrightnessConfig = config.getAntiBrightnessConfig();
+        antiBrightnessTracker = new AntiBrightnessTracker(antiBrightnessConfig);
+        antiBrightnessAdminAlerter = new AntiBrightnessAdminAlerter(logger, antiBrightnessConfig);
+        antiBrightnessListener = new AntiBrightnessListener(
+                antiBrightnessConfig,
+                antiBrightnessTracker,
+                antiBrightnessAdminAlerter
+        );
+        Bukkit.getPluginManager().registerEvents(antiBrightnessListener, this);
+
         if (!antiBrightnessConfig.enabled()) {
             return;
         }
-
-        AntiBrightnessTracker antiBrightnessTracker = new AntiBrightnessTracker(antiBrightnessConfig);
-        Bukkit.getPluginManager().registerEvents(
-                new AntiBrightnessListener(antiBrightnessConfig, antiBrightnessTracker),
-                this
-        );
 
         antiBrightnessDecayJob = new AntiBrightnessDecayJob(antiBrightnessTracker, antiBrightnessConfig, logger);
         antiBrightnessDecayThread = Thread.ofVirtual()
                 .name("market-sync-anti-brightness-decay")
                 .start(antiBrightnessDecayJob);
+    }
+
+    private void reloadAntiBrightnessConfig() {
+        AntiBrightnessConfig antiBrightnessConfig = config.getAntiBrightnessConfig();
+        if (antiBrightnessTracker != null) {
+            antiBrightnessTracker.updateConfig(antiBrightnessConfig);
+        }
+        if (antiBrightnessAdminAlerter != null) {
+            antiBrightnessAdminAlerter.updateConfig(antiBrightnessConfig);
+        }
+        if (antiBrightnessListener != null) {
+            antiBrightnessListener.updateConfig(antiBrightnessConfig);
+        }
+        if (antiBrightnessDecayJob != null) {
+            antiBrightnessDecayJob.updateConfig(antiBrightnessConfig);
+        }
+    }
+
+    private void initCommands() {
+        PluginCommand command = getCommand("marketsync");
+        if (command == null) {
+            logger.warn("Command 'marketsync' is not defined in plugin descriptor");
+            return;
+        }
+
+        MarketSyncCommand executor = new MarketSyncCommand(this);
+        command.setExecutor(executor);
+        command.setTabCompleter(executor);
     }
 
     private void startOrderProcessingJob() {

@@ -7,6 +7,13 @@ website: https://todo.org
 api-version: '1.21.11'
 bootstrapper: org.game24.marketsync.init.MarketSyncBootstrap
 
+commands:
+  marketsync:
+    description: MarketSync admin commands
+    usage: /marketsync reload
+    permission: marketsync.reload
+    permission-message: Недостаточно прав.
+
 dependencies:
   server:
     AuthMe:

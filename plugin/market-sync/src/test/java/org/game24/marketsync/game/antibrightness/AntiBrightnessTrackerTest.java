@@ -24,7 +24,11 @@ class AntiBrightnessTrackerTest {
             10,
             10,
             "marketsync.antibrightness.bypass",
-            "warning"
+            "warning",
+            true,
+            "marketsync.antibrightness.alert",
+            30,
+            "alert"
     );
 
     @Test

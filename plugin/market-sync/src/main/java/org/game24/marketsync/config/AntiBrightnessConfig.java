@@ -11,6 +11,10 @@ public record AntiBrightnessConfig(
         int punishmentDurationSeconds,
         int decayIntervalSeconds,
         String bypassPermission,
-        String warningMessage
+        String warningMessage,
+        boolean adminAlertEnabled,
+        String adminAlertPermission,
+        int adminAlertCooldownSeconds,
+        String adminAlertMessage
 ) {
 }

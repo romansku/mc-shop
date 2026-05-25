@@ -10,7 +10,7 @@ public class AntiBrightnessDecayJob implements Runnable {
 
     private final AntiBrightnessTracker tracker;
 
-    private final AntiBrightnessConfig config;
+    private volatile AntiBrightnessConfig config;
 
     private final Logger logger;
 
@@ -20,6 +20,10 @@ public class AntiBrightnessDecayJob implements Runnable {
         this.tracker = tracker;
         this.config = config;
         this.logger = logger;
+    }
+
+    public void updateConfig(AntiBrightnessConfig config) {
+        this.config = config;
     }
 
     @Override

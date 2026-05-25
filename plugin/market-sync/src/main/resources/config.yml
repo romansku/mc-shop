@@ -24,3 +24,8 @@ anti-brightness:
   decay-interval-seconds: 10
   bypass-permission: 'marketsync.antibrightness.bypass'
   warning-message: 'Всевидящее око чует запретную магию в этой тьме. Оставь ее, иначе мрак сам взыщет с нарушителя.'
+  admin-alert:
+    enabled: true
+    permission: 'marketsync.antibrightness.alert'
+    cooldown-seconds: 15
+    message: '&c[AntiBrightness] &7{player} &8@ &7{world} {x} {y} {z} &8| &7свет: глаза={eye_light} ноги={feet_light} блок={block_light} &8| &7счёт={count} окно={warning_window}/{punishment_window}'
