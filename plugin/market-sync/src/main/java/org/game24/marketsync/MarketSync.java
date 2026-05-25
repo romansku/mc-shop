@@ -3,6 +3,7 @@ package org.game24.marketsync;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.game24.marketsync.config.AntiBrightnessConfig;
 import org.game24.marketsync.config.MarketSyncConfig;
 import org.game24.marketsync.dao.Database;
 import org.game24.marketsync.dao.DeliveryDAO;
@@ -15,9 +16,12 @@ import org.game24.marketsync.dao.impl.OrderSimpleDAO;
 import org.game24.marketsync.dao.impl.PlayerSimpleDAO;
 import org.game24.marketsync.game.CommandDeliveryService;
 import org.game24.marketsync.game.ItemDeliveryService;
+import org.game24.marketsync.game.antibrightness.AntiBrightnessDecayJob;
+import org.game24.marketsync.game.antibrightness.AntiBrightnessTracker;
 import org.game24.marketsync.game.hook.AuthMeHook;
 import org.game24.marketsync.game.hook.LuckPermsHook;
 import org.game24.marketsync.game.hook.PlayerPointsHook;
+import org.game24.marketsync.game.listener.AntiBrightnessListener;
 import org.game24.marketsync.game.listener.NicknameChangeListener;
 import org.game24.marketsync.game.listener.PlayerRegistryListener;
 import org.game24.marketsync.game.placeholder.NickPlaceholderData;
@@ -66,6 +70,10 @@ public class MarketSync extends JavaPlugin {
 
     private NicknamePlaceholderExpansion placeholderExpansion;
 
+    private AntiBrightnessDecayJob antiBrightnessDecayJob;
+
+    private Thread antiBrightnessDecayThread;
+
     @Override
     public void onEnable() {
         this.logger = this.getSLF4JLogger();
@@ -76,6 +84,7 @@ public class MarketSync extends JavaPlugin {
         }
         initPlayerRegistry();
         initHooks();
+        initAntiBrightness();
         initPlaceholders();
         startOrderProcessingJob();
     }
@@ -117,6 +126,24 @@ public class MarketSync extends JavaPlugin {
     private void initHooks() {
         luckPermsHook = new LuckPermsHook(this);
         playerPointsHook = new PlayerPointsHook(this);
+    }
+
+    private void initAntiBrightness() {
+        AntiBrightnessConfig antiBrightnessConfig = config.getAntiBrightnessConfig();
+        if (!antiBrightnessConfig.enabled()) {
+            return;
+        }
+
+        AntiBrightnessTracker antiBrightnessTracker = new AntiBrightnessTracker(antiBrightnessConfig);
+        Bukkit.getPluginManager().registerEvents(
+                new AntiBrightnessListener(antiBrightnessConfig, antiBrightnessTracker),
+                this
+        );
+
+        antiBrightnessDecayJob = new AntiBrightnessDecayJob(antiBrightnessTracker, antiBrightnessConfig, logger);
+        antiBrightnessDecayThread = Thread.ofVirtual()
+                .name("market-sync-anti-brightness-decay")
+                .start(antiBrightnessDecayJob);
     }
 
     private void startOrderProcessingJob() {
@@ -162,6 +189,7 @@ public class MarketSync extends JavaPlugin {
         }
 
         shutdownOrderProcessingJob();
+        shutdownAntiBrightness();
 
         if (database != null) {
             database.close();
@@ -185,6 +213,16 @@ public class MarketSync extends JavaPlugin {
                 logger.warn("Shutdown thread was interrupted");
                 Thread.currentThread().interrupt();
             }
+        }
+    }
+
+    private void shutdownAntiBrightness() {
+        if (antiBrightnessDecayJob != null) {
+            antiBrightnessDecayJob.stop();
+        }
+
+        if (antiBrightnessDecayThread != null) {
+            antiBrightnessDecayThread.interrupt();
         }
     }
 }

@@ -11,3 +11,16 @@ database:
 
 job:
   delay-minutes: 2
+
+anti-brightness:
+  enabled: true
+  light-threshold: 1
+  min-interval-ms: 2000
+  warning-threshold: 3
+  warning-window-ms: 10000
+  punishment-threshold: 4
+  punishment-window-ms: 15000
+  punishment-duration-seconds: 10
+  decay-interval-seconds: 10
+  bypass-permission: 'marketsync.antibrightness.bypass'
+  warning-message: 'Всевидящее око чует запретную магию в этой тьме. Оставь ее, иначе мрак сам взыщет с нарушителя.'
