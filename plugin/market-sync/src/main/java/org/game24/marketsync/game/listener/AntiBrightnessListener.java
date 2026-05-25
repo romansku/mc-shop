@@ -12,6 +12,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.game24.marketsync.config.AntiBrightnessConfig;
+import org.game24.marketsync.game.antibrightness.AntiBrightnessAdminAlerter;
+import org.game24.marketsync.game.antibrightness.AntiBrightnessLightSnapshot;
 import org.game24.marketsync.game.antibrightness.AntiBrightnessTracker;
 import org.game24.marketsync.game.antibrightness.AntiBrightnessTracker.SuspicionResult;
 
@@ -21,24 +23,35 @@ public class AntiBrightnessListener implements Listener {
 
     private static final int TICKS_IN_SECOND = 20;
 
-    private final AntiBrightnessConfig config;
+    private volatile AntiBrightnessConfig config;
 
     private final AntiBrightnessTracker tracker;
 
+    private final AntiBrightnessAdminAlerter adminAlerter;
+
     public AntiBrightnessListener(AntiBrightnessConfig config,
-                                  AntiBrightnessTracker tracker) {
+                                  AntiBrightnessTracker tracker,
+                                  AntiBrightnessAdminAlerter adminAlerter) {
         this.config = config;
         this.tracker = tracker;
+        this.adminAlerter = adminAlerter;
+    }
+
+    public void updateConfig(AntiBrightnessConfig config) {
+        this.config = config;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
-        if (!config.enabled()) {
+        AntiBrightnessConfig current = config;
+        if (!current.enabled()) {
             return;
         }
 
         Player player = event.getPlayer();
-        if (hasBypass(player) || !isSuspiciousLight(player, event.getBlock())) {
+        Block brokenBlock = event.getBlock();
+        AntiBrightnessLightSnapshot lights = captureLightSnapshot(player, brokenBlock);
+        if (hasBypass(player) || !isSuspiciousLight(current, player, brokenBlock, lights)) {
             return;
         }
 
@@ -47,12 +60,14 @@ public class AntiBrightnessListener implements Listener {
             return;
         }
 
+        adminAlerter.tryAlert(player, result, lights, brokenBlock.getLocation());
+
         if (result.warningRequired()) {
-            player.sendMessage(config.warningMessage());
+            player.sendMessage(current.warningMessage());
         }
 
         if (result.punishmentRequired()) {
-            int durationTicks = config.punishmentDurationSeconds() * TICKS_IN_SECOND;
+            int durationTicks = current.punishmentDurationSeconds() * TICKS_IN_SECOND;
             player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, durationTicks, 0, false, false, true));
         }
     }
@@ -73,16 +88,27 @@ public class AntiBrightnessListener implements Listener {
         }
 
         return player.hasPotionEffect(PotionEffectType.NIGHT_VISION)
-               || player.hasPotionEffect(PotionEffectType.CONDUIT_POWER);
+                || player.hasPotionEffect(PotionEffectType.CONDUIT_POWER);
     }
 
-    private boolean isSuspiciousLight(Player player, Block brokenBlock) {
-        int threshold = config.lightThreshold();
-        if (player.getEyeLocation().getBlock().getLightLevel() > threshold) {
+    private AntiBrightnessLightSnapshot captureLightSnapshot(Player player, Block brokenBlock) {
+        int eyeLight = player.getEyeLocation().getBlock().getLightLevel();
+        int feetLight = player.getLocation().getBlock().getLightLevel();
+        Block playerSideBlock = brokenBlock.getRelative(faceTowardPlayer(brokenBlock, player.getEyeLocation()));
+        int blockLight = playerSideBlock.getLightLevel();
+        return new AntiBrightnessLightSnapshot(eyeLight, feetLight, blockLight);
+    }
+
+    private boolean isSuspiciousLight(AntiBrightnessConfig current,
+                                      Player player,
+                                      Block brokenBlock,
+                                      AntiBrightnessLightSnapshot lights) {
+        int threshold = current.lightThreshold();
+        if (lights.eyeLight() > threshold) {
             return false;
         }
 
-        if (player.getLocation().getBlock().getLightLevel() > threshold) {
+        if (lights.feetLight() > threshold) {
             return false;
         }
 

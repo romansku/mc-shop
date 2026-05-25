@@ -11,11 +11,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class AntiBrightnessTracker {
 
-    private final AntiBrightnessConfig config;
+    private volatile AntiBrightnessConfig config;
 
     private final ConcurrentHashMap<UUID, PlayerWarnings> warnings = new ConcurrentHashMap<>();
 
     public AntiBrightnessTracker(AntiBrightnessConfig config) {
+        this.config = config;
+    }
+
+    public void updateConfig(AntiBrightnessConfig config) {
         this.config = config;
     }
 

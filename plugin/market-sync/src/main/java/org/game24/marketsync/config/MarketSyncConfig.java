@@ -5,10 +5,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class MarketSyncConfig {
 
-    private final FileConfiguration config;
+    private FileConfiguration config;
 
     public MarketSyncConfig(JavaPlugin plugin) {
         plugin.saveDefaultConfig();
+        this.config = plugin.getConfig();
+    }
+
+    public void reload(JavaPlugin plugin) {
+        plugin.reloadConfig();
         this.config = plugin.getConfig();
     }
 
@@ -59,6 +64,13 @@ public class MarketSyncConfig {
                 this.config.getString(
                         "anti-brightness.warning-message",
                         "Всевидящее око чует запретную магию в этой тьме. Оставь ее, иначе мрак сам взыщет с нарушителя."
+                ),
+                this.config.getBoolean("anti-brightness.admin-alert.enabled", true),
+                this.config.getString("anti-brightness.admin-alert.permission", "marketsync.antibrightness.alert"),
+                this.config.getInt("anti-brightness.admin-alert.cooldown-seconds", 15),
+                this.config.getString(
+                        "anti-brightness.admin-alert.message",
+                        "&c[AntiBrightness] &7{player} &8@ &7{world} {x} {y} {z} &8| &7свет: глаза={eye_light} ноги={feet_light} блок={block_light} &8| &7счёт={count} окно={warning_window}/{punishment_window}"
                 )
         );
     }
