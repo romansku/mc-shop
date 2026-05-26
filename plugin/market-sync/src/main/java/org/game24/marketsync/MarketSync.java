@@ -2,7 +2,6 @@ package org.game24.marketsync;
 
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.game24.marketsync.config.AntiBrightnessConfig;
 import org.game24.marketsync.config.MarketSyncConfig;
@@ -101,6 +100,14 @@ public class MarketSync extends JavaPlugin {
 
     public void reloadPluginConfig() {
         config.reload(this);
+        if (database != null) {
+            try {
+                database.reloadPool(config);
+            } catch (RuntimeException e) {
+                logger.error("Failed to reload database pool", e);
+                throw e;
+            }
+        }
         reloadAntiBrightnessConfig();
     }
 
@@ -181,15 +188,8 @@ public class MarketSync extends JavaPlugin {
     }
 
     private void initCommands() {
-        PluginCommand command = getCommand("marketsync");
-        if (command == null) {
-            logger.warn("Command 'marketsync' is not defined in plugin descriptor");
-            return;
-        }
-
-        MarketSyncCommand executor = new MarketSyncCommand(this);
-        command.setExecutor(executor);
-        command.setTabCompleter(executor);
+        MarketSyncCommand command = new MarketSyncCommand(this);
+        registerCommand("marketsync", "MarketSync admin commands", command);
     }
 
     private void startOrderProcessingJob() {

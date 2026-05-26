@@ -1,15 +1,15 @@
 package org.game24.marketsync.game.command;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import io.papermc.paper.command.brigadier.BasicCommand;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import org.game24.marketsync.MarketSync;
+import org.jspecify.annotations.NonNull;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class MarketSyncCommand implements CommandExecutor, TabCompleter {
+public class MarketSyncCommand implements BasicCommand {
 
     private static final String PERMISSION_RELOAD = "marketsync.reload";
 
@@ -20,30 +20,37 @@ public class MarketSyncCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public void execute(CommandSourceStack source, String[] args) {
+        var sender = source.getSender();
+
         if (args.length == 0) {
-            sender.sendMessage("Использование: /" + label + " reload");
-            return true;
+            sender.sendMessage("Использование: /marketsync reload");
+            return;
         }
 
         if ("reload".equalsIgnoreCase(args[0])) {
             if (!sender.hasPermission(PERMISSION_RELOAD)) {
                 sender.sendMessage("Недостаточно прав.");
-                return true;
+                return;
             }
 
-            plugin.reloadPluginConfig();
+            try {
+                plugin.reloadPluginConfig();
+            } catch (RuntimeException e) {
+                sender.sendMessage("Ошибка перезагрузки конфигурации: " + e.getMessage());
+                return;
+            }
             sender.sendMessage("Конфигурация MarketSync перезагружена.");
-            return true;
+            return;
         }
 
-        sender.sendMessage("Неизвестная подкоманда. Использование: /" + label + " reload");
-        return true;
+        sender.sendMessage("Неизвестная подкоманда. Использование: /marketsync reload");
     }
 
+
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1 && sender.hasPermission(PERMISSION_RELOAD)) {
+    public @NonNull Collection<String> suggest(@NonNull CommandSourceStack source, String[] args) {
+        if (args.length == 1 && source.getSender().hasPermission(PERMISSION_RELOAD)) {
             return List.of("reload");
         }
         return Collections.emptyList();
