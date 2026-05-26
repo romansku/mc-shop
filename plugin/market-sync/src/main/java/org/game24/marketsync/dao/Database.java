@@ -23,14 +23,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 public class Database {
 
-    private final HikariDataSource dataSource;
+    private final ReadWriteLock poolLock = new ReentrantReadWriteLock();
+
+    private HikariDataSource dataSource;
 
     public Database(MarketSyncConfig config) {
+        this.dataSource = createDataSource(config);
+    }
 
+    private HikariDataSource createDataSource(MarketSyncConfig config) {
         HikariConfig hikariConfig = new HikariConfig();
 
         hikariConfig.setJdbcUrl(buildJdbcUrl(config));
@@ -42,7 +49,30 @@ public class Database {
         hikariConfig.setConnectionTimeout(5000);
         hikariConfig.setPoolName("MarketSync-Pool");
 
-        this.dataSource = new HikariDataSource(hikariConfig);
+        return new HikariDataSource(hikariConfig);
+    }
+
+    public void reloadPool(MarketSyncConfig config) {
+        HikariDataSource newDataSource = createDataSource(config);
+
+        //noinspection EmptyTryBlock
+        try (Connection ignore = newDataSource.getConnection()) {
+            // validate config before swapping pools
+        } catch (SQLException e) {
+            newDataSource.close();
+            throw new IllegalStateException("Failed to connect with updated database config", e);
+        }
+
+        poolLock.writeLock().lock();
+        try {
+            HikariDataSource oldDataSource = this.dataSource;
+            this.dataSource = newDataSource;
+            if (oldDataSource != null && !oldDataSource.isClosed()) {
+                oldDataSource.close();
+            }
+        } finally {
+            poolLock.writeLock().unlock();
+        }
     }
 
     private String buildJdbcUrl(MarketSyncConfig config) {
@@ -54,12 +84,22 @@ public class Database {
     }
 
     public Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        poolLock.readLock().lock();
+        try {
+            return dataSource.getConnection();
+        } finally {
+            poolLock.readLock().unlock();
+        }
     }
 
     public void close() {
-        if (dataSource != null && !dataSource.isClosed()) {
-            dataSource.close();
+        poolLock.writeLock().lock();
+        try {
+            if (dataSource != null && !dataSource.isClosed()) {
+                dataSource.close();
+            }
+        } finally {
+            poolLock.writeLock().unlock();
         }
     }
 
