@@ -55,6 +55,7 @@ public class OrderSimpleDAO implements OrderDAO {
                                     .type(ItemType.valueOf(rs.getString("item_type")))
                                     .data(rs.getString("data"))
                                     .count(rs.getInt("amount"))
+                                    .name(rs.getString("name"))
                                     .build());
 
                 }
@@ -82,7 +83,8 @@ public class OrderSimpleDAO implements OrderDAO {
                        i.id as item_id,
                        i.item_type,
                        i.data,
-                       i.amount
+                       i.amount,
+                       i.name
                     FROM mshop_player_orders po
                 JOIN mshop_order_items oi on po.id = oi.order_id
                 JOIN mshop_items i on oi.item_id = i.id

@@ -4,14 +4,19 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.NonNull;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.game24.marketsync.model.Delivery;
 import org.game24.marketsync.model.DeliveryResult;
+import org.game24.marketsync.model.Item;
 import org.game24.marketsync.model.Order;
 import org.game24.marketsync.service.OrderService;
 import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,13 +37,17 @@ public class OrderProcessor {
 
     private final DeliveryProcessor deliveryProcessor;
 
+    private final JavaPlugin plugin;
+
     private final Logger logger;
 
     public OrderProcessor(@NonNull OrderService orderService,
                           @NonNull DeliveryProcessor deliveryProcessor,
+                          @NonNull JavaPlugin plugin,
                           @NonNull Logger logger) {
         this.orderService = orderService;
         this.deliveryProcessor = deliveryProcessor;
+        this.plugin = plugin;
         this.logger = logger;
     }
 
@@ -65,6 +74,7 @@ public class OrderProcessor {
                             int countItems = order.getItems().size();
                             if (finishedCount == countItems) {
                                 orderService.complete(order.getId());
+                                notifyOrderCompleted(order);
                             }
                         })
                         .join();
@@ -94,5 +104,33 @@ public class OrderProcessor {
                 .<CompletableFuture<DeliveryResult>>toArray(CompletableFuture[]::new);
     }
 
+    private void notifyOrderCompleted(@NonNull Order order) {
+        String username = order.getUsername();
+        String itemNames = order.getItems().stream()
+                .map(this::resolveItemName)
+                .collect(Collectors.joining("\", \""));
+
+        logger.info("\"{}\" получил \"{}\"", username, itemNames);
+
+        String playerMessage = "Вы получили \"" + itemNames
+                + "\", админ благодарит вас за покупку и поддержку сервера.";
+        Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
+            if (task.isCancelled()) {
+                return;
+            }
+            Player onlinePlayer = Bukkit.getPlayerExact(username);
+            if (onlinePlayer != null) {
+                onlinePlayer.sendMessage(playerMessage);
+            }
+        });
+    }
+
+    private String resolveItemName(Item item) {
+        String name = item.getName();
+        if (name != null && !name.isBlank()) {
+            return name;
+        }
+        return "товар #" + item.getId();
+    }
 
 }

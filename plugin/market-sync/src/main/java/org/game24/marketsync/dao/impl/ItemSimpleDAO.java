@@ -29,7 +29,7 @@ public class ItemSimpleDAO implements ItemDAO {
     @Override
     public Item find(long id) {
         String sql = """
-                select id, item_type, data, amount
+                select id, item_type, data, amount, name
                 from mshop_items where id = ?""";
 
         try (Connection conn = database.getConnection();
@@ -55,6 +55,7 @@ public class ItemSimpleDAO implements ItemDAO {
                 .type(ItemType.valueOf(rs.getString("item_type")))
                 .data(rs.getString("data"))
                 .count(rs.getInt("amount"))
+                .name(rs.getString("name"))
                 .build();
     }
 
@@ -66,7 +67,8 @@ public class ItemSimpleDAO implements ItemDAO {
                     item.id,
                     item.item_type,
                     item.data,
-                    item.amount
+                    item.amount,
+                    item.name
                     from mshop_item_packs pack
                 join mshop_items item on pack.child_item_id = item.id
                 where parent_item_id = ?""";
