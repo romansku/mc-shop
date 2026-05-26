@@ -47,6 +47,7 @@ build/
 /site/.turbo/
 /site/.eslintcache
 /site/.vercel/
+/site/package-lock.json
 /site/npm-debug.log*
 /site/yarn-debug.log*
 /site/yarn-error.log*
@@ -56,3 +57,4 @@ build/
 /site/.env.development.local
 /site/.env.test.local
 /site/.env.production.local
+/site/logs/

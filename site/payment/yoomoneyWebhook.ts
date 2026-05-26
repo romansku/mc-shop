@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 export type YooMoneyWebhookPayload = {
+  rawParams: Record<string, string>;
   notification_type: string;
   operation_id: string;
   amount: string;
@@ -46,7 +47,21 @@ export function parseYooMoneyWebhookBody(rawBody: string): YooMoneyWebhookPayloa
     return "";
   };
 
+  const rawParams: Record<string, string> = {};
+  for (const [key, value] of Object.entries(source)) {
+    if (typeof value === "string") {
+      rawParams[key] = value;
+      continue;
+    }
+    if (typeof value === "number" || typeof value === "boolean") {
+      rawParams[key] = String(value);
+      continue;
+    }
+    rawParams[key] = "";
+  }
+
   return {
+    rawParams,
     notification_type: get("notification_type"),
     operation_id: get("operation_id"),
     amount: get("amount"),
@@ -62,7 +77,46 @@ export function parseYooMoneyWebhookBody(rawBody: string): YooMoneyWebhookPayloa
   };
 }
 
-export function verifyYooMoneySha1(payload: YooMoneyWebhookPayload, secret: string): boolean {
+function encodeRfc3986(value: string): string {
+  return encodeURIComponent(value).replace(/[!'()*]/g, (char) =>
+    `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
+export function verifyYooMoneySign(
+  payload: YooMoneyWebhookPayload,
+  secret: string,
+): {
+  ok: boolean;
+  computedSign: string;
+  receivedSign: string;
+  signatureBase: string;
+} {
+  const entries = Object.entries(payload.rawParams)
+    .filter(([key]) => key !== "sign")
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${encodeRfc3986(value ?? "")}`);
+
+  const signatureBase = entries.join("&");
+  const computedSign = crypto
+    .createHmac("sha256", secret)
+    .update(signatureBase, "utf8")
+    .digest("hex");
+  const receivedSign = (payload.sign ?? "").toLowerCase();
+
+  return {
+    ok: computedSign.toLowerCase() === receivedSign,
+    computedSign,
+    receivedSign,
+    signatureBase,
+  };
+}
+
+export function verifyYooMoneySha1(payload: YooMoneyWebhookPayload, secret: string): {
+  ok: boolean;
+  computedHash: string;
+  receivedHash: string;
+} {
   const material = [
     payload.notification_type,
     payload.operation_id,
@@ -75,6 +129,11 @@ export function verifyYooMoneySha1(payload: YooMoneyWebhookPayload, secret: stri
     payload.label,
   ].join("&");
 
-  const computed = crypto.createHash("sha1").update(material, "utf8").digest("hex");
-  return computed.toLowerCase() === payload.sha1_hash?.toLowerCase();
+  const computedHash = crypto.createHash("sha1").update(material, "utf8").digest("hex");
+  const receivedHash = (payload.sha1_hash ?? "").toLowerCase();
+  return {
+    ok: computedHash.toLowerCase() === receivedHash,
+    computedHash,
+    receivedHash,
+  };
 }
