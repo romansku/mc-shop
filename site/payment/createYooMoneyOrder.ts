@@ -2,6 +2,7 @@ import "server-only";
 
 import { prisma } from "@/app/dao/prisma";
 import { formatOrderAmount } from "./money";
+import { paymentLog } from "./paymentLogger";
 import type { CreateYooMoneyOrderResponseBody, YooMoneyPaymentType } from "./types";
 
 const YOOMONEY_ACTION_URL = "https://yoomoney.ru/quickpay/confirm";
@@ -9,7 +10,7 @@ const YOOMONEY_ACTION_URL = "https://yoomoney.ru/quickpay/confirm";
 function getReceiverWallet(): string {
   const wallet = process.env.YOOMONEY_WALLET?.trim();
   if (!wallet) {
-    console.error("Not found YOOMONEY data");
+    paymentLog("error", "yoomoney:create-order wallet missing");
     throw new Error("Что-то идет не так, попробуйте позже");
   }
   return wallet;
@@ -24,6 +25,12 @@ export async function createYooMoneyOrder(params: {
 }): Promise<CreateYooMoneyOrderResponseBody> {
   const receiver = getReceiverWallet();
   const amountStr = formatOrderAmount(params.totalAmount);
+  paymentLog("info", "yoomoney:create-order start", {
+    playerLogin: params.playerLogin,
+    itemCount: params.itemIds.length,
+    amount: amountStr,
+    paymentType: params.paymentType,
+  });
 
   return await prisma.$transaction(async (tx) => {
     const parentItemIds = params.itemIds.map((id) => BigInt(id));
@@ -38,6 +45,7 @@ export async function createYooMoneyOrder(params: {
 
     if (childItemIds.length === 0) {
       childItemIds = parentItemIds;
+      paymentLog("info", "yoomoney:create-order fallback to parent items");
     }
 
     const createdOrder = await tx.mshop_player_orders.create({
@@ -61,6 +69,10 @@ export async function createYooMoneyOrder(params: {
     });
 
     const orderId = String(createdOrder.id);
+    paymentLog("info", "yoomoney:create-order committed", {
+      orderId,
+      orderItemsCount: childItemIds.length,
+    });
 
     return {
       ok: true,
