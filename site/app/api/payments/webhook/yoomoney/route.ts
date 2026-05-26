@@ -22,13 +22,6 @@ export async function POST(request: Request) {
       currency: payload.currency,
     });
 
-    if (!payload.label || !/^\d+$/.test(payload.label)) {
-      paymentLog("warn", "yoomoney:webhook rejected invalid label", {
-        label: payload.label,
-      });
-      return NextResponse.json({ ok: false, message: "Invalid label" }, { status: 400 });
-    }
-
     const secret = process.env.YOOMONEY_NOTIFICATION_SECRET?.trim();
     if (!secret) {
       verificationMode = "skipped_no_secret";
@@ -36,6 +29,15 @@ export async function POST(request: Request) {
         verificationMode,
       });
     } else {
+
+      if (!payload.label || !/^\d+$/.test(payload.label)) {
+          paymentLog("warn", "yoomoney:webhook rejected invalid label", {
+              label: payload.label,
+          });
+          return NextResponse.json({ok: false, message: "Invalid label"}, {status: 400});
+      }
+
+
       if (payload.sign) {
         verificationMode = "sign";
         const verify = verifyYooMoneySign(payload, secret);
@@ -49,11 +51,13 @@ export async function POST(request: Request) {
           });
           return NextResponse.json({ ok: false, message: "Invalid sign" }, { status: 401 });
         }
+
         paymentLog("info", "yoomoney:webhook sign verified", {
           verificationMode,
           label: payload.label,
           operationId: payload.operation_id,
         });
+
       } else {
         verificationMode = "sha1_legacy";
         // Backward compatibility for old notifications before sign rollout.
