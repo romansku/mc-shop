@@ -202,7 +202,7 @@ public class MarketSync extends JavaPlugin {
                 itemDeliveryService,
                 commandDeliveryService,
                 itemService);
-        OrderProcessor orderProcessor = new OrderProcessor(orderService, deliveryProcessor, logger);
+        OrderProcessor orderProcessor = new OrderProcessor(orderService, deliveryProcessor, this, logger);
         OrderProcessingJob job = new OrderProcessingJob(orderService, orderProcessor, logger);
 
         int jobDelay = config.getJobDelay();

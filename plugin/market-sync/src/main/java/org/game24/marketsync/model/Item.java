@@ -15,6 +15,8 @@ public class Item {
 
     private String data;
 
+    private String name;
+
     @Builder.Default
     private int count = 1;
 

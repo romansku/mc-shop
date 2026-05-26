@@ -32,14 +32,7 @@ public class ItemDeliveryService {
         Logger logger = plugin.getSLF4JLogger();
         long orderId = delivery.getOrderId();
         long itemId = delivery.getItemId();
-
         String username = delivery.getUsername();
-        Player onlinePlayer = Bukkit.getPlayerExact(username);
-        if (onlinePlayer == null) {
-            logger.debug("Player {} for order {} is offline", username, orderId);
-            resultFuture.complete(DeliveryResult.INCOMPLETED);
-            return resultFuture;
-        }
 
         String itemMaterial = item.getData();
         NamespacedKey key = NamespacedKey.fromString(itemMaterial);
@@ -58,19 +51,32 @@ public class ItemDeliveryService {
 
         ItemStack itemStack = new ItemStack(material, item.getCount());
 
-        onlinePlayer.getScheduler().run(plugin, task -> {
+        Bukkit.getGlobalRegionScheduler().run(plugin, task -> {
             if (task.isCancelled()) {
+                resultFuture.complete(DeliveryResult.FAILED);
                 return;
             }
-            PlayerInventory inventory = onlinePlayer.getInventory();
-            if (hasSpace(inventory, itemStack)) {
-                inventory.addItem(itemStack);
-                resultFuture.complete(DeliveryResult.COMPLETED);
-            } else {
+
+            Player onlinePlayer = Bukkit.getPlayerExact(username);
+            if (onlinePlayer == null) {
+                logger.debug("Player {} for order {} is offline", username, orderId);
                 resultFuture.complete(DeliveryResult.INCOMPLETED);
+                return;
             }
 
-        }, () -> logOffline(username, orderId, itemId, resultFuture));
+            onlinePlayer.getScheduler().run(plugin, entityTask -> {
+                if (entityTask.isCancelled()) {
+                    return;
+                }
+                PlayerInventory inventory = onlinePlayer.getInventory();
+                if (hasSpace(inventory, itemStack)) {
+                    inventory.addItem(itemStack);
+                    resultFuture.complete(DeliveryResult.COMPLETED);
+                } else {
+                    resultFuture.complete(DeliveryResult.INCOMPLETED);
+                }
+            }, () -> logOffline(username, orderId, itemId, resultFuture));
+        });
 
         return resultFuture
                 .orTimeout(10, TimeUnit.SECONDS)
@@ -87,7 +93,6 @@ public class ItemDeliveryService {
         resultFuture.complete(DeliveryResult.INCOMPLETED);
     }
 
-    // Метод для проверки места
     private boolean hasSpace(Inventory inv, ItemStack item) {
         int freeSpace = 0;
         for (int i = 0; i < 36; i++) {
