@@ -68,7 +68,7 @@ public class AntiBrightnessListener implements Listener {
 
         if (result.punishmentRequired()) {
             int durationTicks = current.punishmentDurationSeconds() * TICKS_IN_SECOND;
-            player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, durationTicks, 0, false, false, true));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, durationTicks, 3, false, false, false));
         }
     }
 
