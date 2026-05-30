@@ -22,6 +22,7 @@ import java.time.Instant;
 public class AntiBrightnessListener implements Listener {
 
     private static final int TICKS_IN_SECOND = 20;
+    private static final String OVERLORD_WORLD = "overlord";
 
     private volatile AntiBrightnessConfig config;
 
@@ -30,8 +31,8 @@ public class AntiBrightnessListener implements Listener {
     private final AntiBrightnessAdminAlerter adminAlerter;
 
     public AntiBrightnessListener(AntiBrightnessConfig config,
-                                  AntiBrightnessTracker tracker,
-                                  AntiBrightnessAdminAlerter adminAlerter) {
+            AntiBrightnessTracker tracker,
+            AntiBrightnessAdminAlerter adminAlerter) {
         this.config = config;
         this.tracker = tracker;
         this.adminAlerter = adminAlerter;
@@ -49,9 +50,17 @@ public class AntiBrightnessListener implements Listener {
         }
 
         Player player = event.getPlayer();
+        if (hasBypass(player)) {
+            return;
+        }
+
         Block brokenBlock = event.getBlock();
+        if (!OVERLORD_WORLD.equals(brokenBlock.getWorld().getName())) {
+            return;
+        }
+
         AntiBrightnessLightSnapshot lights = captureLightSnapshot(player, brokenBlock);
-        if (hasBypass(player) || !isSuspiciousLight(current, player, brokenBlock, lights)) {
+        if (!isSuspiciousLight(current, player, brokenBlock, lights)) {
             return;
         }
 
@@ -100,9 +109,9 @@ public class AntiBrightnessListener implements Listener {
     }
 
     private boolean isSuspiciousLight(AntiBrightnessConfig current,
-                                      Player player,
-                                      Block brokenBlock,
-                                      AntiBrightnessLightSnapshot lights) {
+            Player player,
+            Block brokenBlock,
+            AntiBrightnessLightSnapshot lights) {
         int threshold = current.lightThreshold();
         if (lights.eyeLight() > threshold) {
             return false;
