@@ -1,7 +1,10 @@
 package org.game24.marketsync.game.listener;
 
+import java.time.Instant;
+
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -17,12 +20,9 @@ import org.game24.marketsync.game.antibrightness.AntiBrightnessLightSnapshot;
 import org.game24.marketsync.game.antibrightness.AntiBrightnessTracker;
 import org.game24.marketsync.game.antibrightness.AntiBrightnessTracker.SuspicionResult;
 
-import java.time.Instant;
-
 public class AntiBrightnessListener implements Listener {
 
     private static final int TICKS_IN_SECOND = 20;
-    private static final String OVERLORD_WORLD = "overlord";
 
     private volatile AntiBrightnessConfig config;
 
@@ -55,7 +55,7 @@ public class AntiBrightnessListener implements Listener {
         }
 
         Block brokenBlock = event.getBlock();
-        if (!OVERLORD_WORLD.equals(brokenBlock.getWorld().getName())) {
+        if (brokenBlock.getWorld().getEnvironment() != Environment.NORMAL) {
             return;
         }
 
