@@ -2,29 +2,54 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import type { ItemCard } from "@/app/dao/itemsCatalogDao";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import type { ShopCategorySection } from "@/app/dao/itemsCatalogDao";
 import { useCartState } from "@/app/state/cartState";
 import styles from "./ShopCatalog.module.css";
 
 type ShopCatalogProps = {
-  products: ItemCard[];
+  categories: ShopCategorySection[];
 };
 
-export default function ShopCatalog({ products }: ShopCatalogProps) {
+export default function ShopCatalog({ categories }: ShopCatalogProps) {
   const [query, setQuery] = useState("");
   const [infoOpen, setInfoOpen] = useState(false);
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const { addItem, hasItem } = useCartState();
 
-  const filtered = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) {
-      return products;
-    }
+  const getCategoryKey = (id: number | null): string => {
+    return id === null ? "uncategorized" : String(id);
+  };
 
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(normalized),
-    );
-  }, [products, query]);
+  const isCollapsed = (id: number | null): boolean => {
+    return collapsedCategories[getCategoryKey(id)] ?? false;
+  };
+
+  const toggleCategory = (id: number | null) => {
+    const key = getCategoryKey(id);
+    setCollapsedCategories((current) => ({
+      ...current,
+      [key]: !(current[key] ?? false),
+    }));
+  };
+
+  const filteredCategories = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    const withFilteredItems = categories.map((category) => {
+      if (!normalized) {
+        return category;
+      }
+      return {
+        ...category,
+        items: category.items.filter((product) =>
+          product.name.toLowerCase().includes(normalized),
+        ),
+      };
+    });
+
+    return withFilteredItems.filter((category) => category.items.length > 0);
+  }, [categories, query]);
 
   return (
     <section className={styles.section}>
@@ -67,44 +92,79 @@ export default function ShopCatalog({ products }: ShopCatalogProps) {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {filteredCategories.length === 0 ? (
         <p className={styles.emptyState}>Товары по запросу не найдены.</p>
       ) : (
-        <div className={styles.grid}>
-          {filtered.map((product) => (
-            <article key={product.id} className={styles.card}>
-              <div className={styles.imageWrap}>
-                {product.imageLink ? (
-                  <Image
-                    src={product.imageLink}
-                    alt={product.name}
-                    fill
-                    unoptimized
-                    className={styles.image}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                ) : (
-                  <div className={styles.imagePlaceholder}>Нет изображения</div>
-                )}
+        <div className={styles.categories}>
+          {filteredCategories.map((category) => (
+            <section key={category.id ?? "uncategorized"} className={styles.categorySection}>
+              <div
+                className={styles.categoryHeader}
+                role="button"
+                tabIndex={0}
+                onClick={() => toggleCategory(category.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    toggleCategory(category.id);
+                  }
+                }}
+                aria-expanded={!isCollapsed(category.id)}
+              >
+                <h2 className={styles.categoryTitle}>{category.name}</h2>
+                <span className={styles.categoryToggleLabel}>
+                  {isCollapsed(category.id) ? "Развернуть" : "Свернуть"}
+                </span>
               </div>
 
-              <h2 className={styles.cardTitle}>{product.name}</h2>
-              <p className={styles.cardDescription}>
-                {product.description ?? "Описание скоро появится."}
-              </p>
+              {!isCollapsed(category.id) ? (
+                <>
+                  <div className={styles.categoryDescription}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {category.description}
+                    </ReactMarkdown>
+                  </div>
 
-              <div className={styles.cardFooter}>
-                <span className={styles.price}>{product.price.toFixed(2)} ₽</span>
-                <button
-                  type="button"
-                  className={styles.addButton}
-                  onClick={() => addItem(product)}
-                  disabled={hasItem(product.id)}
-                >
-                  {hasItem(product.id) ? "Уже в корзине" : "Добавить в корзину"}
-                </button>
-              </div>
-            </article>
+                  <div className={styles.grid}>
+                    {category.items.map((product) => (
+                      <article key={product.id} className={styles.card}>
+                        <div className={styles.imageWrap}>
+                          {product.imageLink ? (
+                            <Image
+                              src={product.imageLink}
+                              alt={product.name}
+                              fill
+                              unoptimized
+                              className={styles.image}
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            />
+                          ) : (
+                            <div className={styles.imagePlaceholder}>Нет изображения</div>
+                          )}
+                        </div>
+
+                        <h3 className={styles.cardTitle}>{product.name}</h3>
+                        <p className={styles.cardDescription}>
+                          {product.description ?? "Описание скоро появится."}
+                        </p>
+
+                        <div className={styles.cardFooter}>
+                          <span className={styles.price}>{product.price.toFixed(2)} ₽</span>
+                          <button
+                            type="button"
+                            className={styles.addButton}
+                            onClick={() => addItem(product)}
+                            disabled={hasItem(product.id)}
+                          >
+                            {hasItem(product.id) ? "Уже в корзине" : "Добавить в корзину"}
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+            </section>
           ))}
         </div>
       )}

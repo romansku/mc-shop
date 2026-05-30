@@ -1,13 +1,28 @@
 import "server-only";
 
-import type { mshop_items } from "@prisma/client";
+import type { mshop_categories, mshop_items } from "@prisma/client";
 import { toMshopCatalogItemModel, type MshopCatalogItemModel } from "@/app/models/mshopCatalogItem";
 import { prisma } from "./prisma";
 
 export type ItemCard = MshopCatalogItemModel;
+export type ShopCategorySection = {
+  id: number | null;
+  name: string;
+  description: string;
+  items: ItemCard[];
+};
 
 function toItemCard(item: mshop_items): ItemCard {
   return toMshopCatalogItemModel(item);
+}
+
+function toCategorySection(category: mshop_categories & { mshop_items: mshop_items[] }): ShopCategorySection {
+  return {
+    id: Number(category.id),
+    name: category.name,
+    description: category.description,
+    items: category.mshop_items.map(toItemCard),
+  };
 }
 
 export async function getAllSortByPrioritization(): Promise<ItemCard[]> {
@@ -18,6 +33,43 @@ export async function getAllSortByPrioritization(): Promise<ItemCard[]> {
   });
 
   return items.map(toItemCard);
+}
+
+export async function getShopCategoriesWithItems(): Promise<ShopCategorySection[]> {
+  const categories = await prisma.mshop_categories.findMany({
+    orderBy: {
+      id: "desc",
+    },
+    include: {
+      mshop_items: {
+        orderBy: {
+          prioritization: "asc",
+        },
+      },
+    },
+  });
+
+  const sections = categories.map(toCategorySection);
+
+  const uncategorized = await prisma.mshop_items.findMany({
+    where: {
+      category_id: null,
+    },
+    orderBy: {
+      prioritization: "asc",
+    },
+  });
+
+  if (uncategorized.length > 0) {
+    sections.push({
+      id: null,
+      name: "Без категории",
+      description: "Товары без назначенной категории.",
+      items: uncategorized.map(toItemCard),
+    });
+  }
+
+  return sections;
 }
 
 export async function getAllFavorites(): Promise<ItemCard[]> {
