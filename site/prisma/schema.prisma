@@ -12,6 +12,7 @@ model mshop_items {
   item_type                   mshop_item_item_type
   data                        String              @db.VarChar(150)
   amount                      Int                 @default(1)
+  category_id                 BigInt?
   name                        String              @unique(map: "uq__mshop_items__name") @db.VarChar(25)
   description                 String              @db.VarChar(500)
   favorite                    Boolean             @default(false)
@@ -19,9 +20,19 @@ model mshop_items {
   price                       Decimal             @db.Decimal(10, 2)
   image_link                  String?             @db.VarChar(512)
   active                      Boolean             @default(false)
+  mshop_categories            mshop_categories?   @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mshop_items_category")
   mshop_item_packs_as_parent  mshop_item_packs[]  @relation("ItemPackParent")
   mshop_item_packs_as_child   mshop_item_packs[]  @relation("ItemPackChild")
   mshop_order_items           mshop_order_items[]
+
+  @@index([category_id], map: "idx_mshop_items_category_id")
+}
+
+model mshop_categories {
+  id          BigInt        @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  description String        @db.LongText
+  mshop_items mshop_items[]
 }
 
 model mshop_item_packs {
